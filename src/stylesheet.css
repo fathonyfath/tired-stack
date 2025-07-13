@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "@iconify/tailwind4";
+
+@import "simplebar/dist/simplebar.min.css";
+
+@import "./components/sidebar/index.css";
