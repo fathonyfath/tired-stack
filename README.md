@@ -36,7 +36,7 @@ To start the development server and watch for changes in assets and server files
 bun run dev
 ```
 
-This will run both watch:assets and watch:server scripts concurrently.
+This will run both `watch:assets` and `watch:server` scripts concurrently.
 
 * `watch:assets`: Compiles CSS and JavaScript assets and watches for changes.
 * `watch:server`: Restarts the Elysia.js server on changes to src/main.tsx.
@@ -49,7 +49,7 @@ Open http://localhost:3000/ with your browser to see the result.
 bun run build
 ```
 
-This will run both build:assets and build:server scripts concurrently.
+This will run both `build:assets` and `build:server` scripts concurrently.
 
 * `build:assets`: Compiles and minifies CSS and JavaScript assets.
 * `build:server`: Compiles the server-side code into a single, minified executable.
