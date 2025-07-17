@@ -1,4 +1,4 @@
-import { Html, PropsWithChildren } from "@kitajs/html";
+import { PropsWithChildren } from "@kitajs/html";
 
 export default function (
   props: PropsWithChildren<{ name?: string }>,

@@ -1,5 +1,3 @@
-import { Html } from "@kitajs/html";
-
 export default function (): JSX.Element {
   return (
     <div class="flex">
