@@ -1,32 +1,30 @@
-import { Elysia } from "elysia";
-import { html } from "@elysiajs/html";
-import { Html } from "@kitajs/html";
-import staticPlugin from "@elysiajs/static";
+import { file, serve } from "bun";
+import { handle } from "@server/handle";
+import { jsx } from "@server/jsx";
 import Layout from "./Layout";
-import SimpleBarExample from "./SimpeBarExample";
 import Skeleton from "./Skeleton";
+import SimpeBarExample from "./SimpeBarExample";
 
-const app = new Elysia()
-  .use(
-    staticPlugin({
-      assets: "public",
-      prefix: "",
-      noCache: true,
+const server = serve({
+  routes: {
+    "/:fileName": handle((req) => {
+      return new Response(file(`public/${req.params.fileName}`));
     }),
-  )
-  .use(html())
-  .get("/", () => (
-    <Layout name="Hello">
-      <Skeleton />
-    </Layout>
-  ))
-  .get("/example", () => (
-    <Layout name="SimpleBar Example">
-      <SimpleBarExample />
-    </Layout>
-  ))
-  .listen(3000);
+    "/": handle(
+      jsx(() => (
+        <Layout name="Hello">
+          <Skeleton />
+        </Layout>
+      )),
+    ),
+    "/example": handle(
+      jsx(() => (
+        <Layout name="SimpleBar Example">
+          <SimpeBarExample />
+        </Layout>
+      )),
+    ),
+  },
+});
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
-);
+console.log(`🚀 Server is running at ${server.url}`);

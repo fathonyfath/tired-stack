@@ -60,7 +60,7 @@ async function buildJS(options: BuildOptions = {}) {
 
   try {
     const result = await build({
-      entrypoints: ["./src/index.ts"],
+      entrypoints: ["./src/script.ts"],
       outdir: "./public",
       target: "browser",
       format: "esm",
@@ -68,7 +68,7 @@ async function buildJS(options: BuildOptions = {}) {
       splitting: false,
       sourcemap: options.minify ? "external" : "inline",
       naming: {
-        entry: "index.js",
+        entry: "script.js",
         chunk: "[name]-[hash].js",
         asset: "[name].[ext]",
       },

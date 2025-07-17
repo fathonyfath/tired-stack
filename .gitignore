@@ -41,11 +41,14 @@ yarn-error.log*
 package-lock.json
 **/*.bun
 
+# VSCode stuff
+.vscode/settings.json
+
 # some of the css and js files since it will be compiled anyway
 public/stylesheet.css
 public/stylesheet.css.map
-public/index.js
-public/index.js.map
+public/script.js
+public/script.js.map
 
 # binary file
-server
+/server

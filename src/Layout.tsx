@@ -10,12 +10,12 @@ export default function (
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>{props.name}</title>
+          <title safe>{props.name}</title>
           <link rel="stylesheet" href="stylesheet.css" />
         </head>
         <body>
           {props.children}
-          <script src="index.js" />
+          <script src="script.js" />
           <div></div>
         </body>
       </html>
