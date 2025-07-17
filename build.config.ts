@@ -187,7 +187,7 @@ async function buildAssets(options: BuildOptions = {}) {
     // Keep the process alive
     const keepAlive = () => {
       return new Promise<never>(() => {
-        // Thhis promise never resolves, keep the process alive
+        // This promise never resolves, keep the process alive
       });
     };
 
