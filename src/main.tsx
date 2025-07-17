@@ -27,4 +27,19 @@ const server = serve({
   },
 });
 
+const cleanup = async () => {
+  try {
+    console.log("⏳ Requesting to stop the server...");
+    await server.stop();
+    console.log("✅ Server stopped successfully");
+  } catch (error) {
+    console.log("❌ Server failed to close gracefully, error:", error);
+  } finally {
+    process.exit(0);
+  }
+};
+
+process.on("SIGINT", cleanup);
+process.on("SIGTERM", cleanup);
+
 console.log(`🚀 Server is running at ${server.url}`);
