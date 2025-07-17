@@ -45,10 +45,10 @@ package-lock.json
 .vscode/settings.json
 
 # some of the css and js files since it will be compiled anyway
-public/stylesheet.css
-public/stylesheet.css.map
-public/script.js
-public/script.js.map
+public/**/*.css
+public/**/*.css.map
+public/**/*.js
+public/**/*.js.map
 
 # binary file
 /server

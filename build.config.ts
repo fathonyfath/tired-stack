@@ -58,26 +58,22 @@ async function buildCSS(opitons: BuildOptions = {}) {
 async function buildJS(options: BuildOptions = {}) {
   await ensureDir("./public");
 
+  const entrypoints = ["./src/script.ts"];
+
   try {
     const result = await build({
-      entrypoints: ["./src/script.ts"],
+      entrypoints: entrypoints,
       outdir: "./public",
       target: "browser",
       format: "esm",
       minify: options.minify,
       splitting: false,
       sourcemap: options.minify ? "external" : "inline",
-      naming: {
-        entry: "script.js",
-        chunk: "[name]-[hash].js",
-        asset: "[name].[ext]",
-      },
       define: {
         "process.env.NODE_ENV": JSON.stringify(
           process.env.NODE_ENV || "development",
         ),
       },
-      external: [],
     });
 
     if (result.success) {
