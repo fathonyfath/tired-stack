@@ -41,7 +41,11 @@ const server = serve({
       ),
     "/htmx": (p) =>
       p.decorate(htmxDecoration).handle((context) => {
-        return new Response(JSON.stringify(context.htmx, null, 4));
+        const response = new Response(JSON.stringify(context.htmx, null, 4));
+        if (context.htmx.isHTMX()) {
+          context.htmx.reswap(response, "innerHTML");
+        }
+        return response;
       }),
   }),
 });
