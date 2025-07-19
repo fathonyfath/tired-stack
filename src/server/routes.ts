@@ -32,6 +32,10 @@ export type Routes<P> = {
   [K in keyof P]: RouterTypes.RouteValue<Extract<K, string>>;
 };
 
+export function config<const P extends RouterConfig<P>>(config: P): P {
+  return config;
+}
+
 export function router<P extends RouterConfig<P>>(config: P): Routes<P> {
   const routes = {} as Routes<P>;
 
