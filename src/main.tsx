@@ -1,30 +1,49 @@
 import { file, serve } from "bun";
-import { handle } from "@server/handle";
+import { router } from "@server/routes";
 import { jsx } from "@server/jsx";
+import { htmx } from "@server/htmx";
 import Layout from "./Layout";
 import Skeleton from "./Skeleton";
 import SimpeBarExample from "./SimpeBarExample";
+import HtmxTest from "./HtmxTest";
+
+const htmxDecoration = htmx();
 
 const server = serve({
-  routes: {
-    "/:fileName": handle((req) => {
-      return new Response(file(`public/${req.params.fileName}`));
-    }),
-    "/": handle(
-      jsx(() => (
-        <Layout name="Hello">
-          <Skeleton />
-        </Layout>
-      )),
-    ),
-    "/example": handle(
-      jsx(() => (
-        <Layout name="SimpleBar Example">
-          <SimpeBarExample />
-        </Layout>
-      )),
-    ),
-  },
+  routes: router({
+    "/:fileName": (p) =>
+      p.handle((c) => {
+        return new Response(file(`public/${c.request.params.fileName}`));
+      }),
+    "/": (p) =>
+      p.handle(
+        jsx(() => (
+          <Layout name="Hello" js css>
+            <Skeleton />
+          </Layout>
+        )),
+      ),
+    "/simplebar": (p) =>
+      p.handle(
+        jsx(() => (
+          <Layout name="SimpleBar Example" js css>
+            <SimpeBarExample />
+          </Layout>
+        )),
+      ),
+    "/htmx-test": (p) =>
+      p.handle(
+        jsx(() => (
+          <Layout name="HTMX" js>
+            <HtmxTest />
+          </Layout>
+        )),
+      ),
+    "/htmx": (p) =>
+      p.decorate(htmxDecoration).handle((context) => {
+        return new Response(JSON.stringify(context.htmx, null, 4));
+      }),
+  }),
 });
 
 const cleanup = async () => {
