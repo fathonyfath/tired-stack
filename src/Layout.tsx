@@ -1,8 +1,8 @@
 import { PropsWithChildren } from "@kitajs/html";
 
-export default function (
-  props: PropsWithChildren<{ name?: string }>,
-): JSX.Element {
+type Props = { name?: string; css?: boolean; js?: boolean };
+
+export default function (props: PropsWithChildren<Props>): JSX.Element {
   return (
     <>
       {`<!docstyle html>`}
@@ -11,11 +11,11 @@ export default function (
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title safe>{props.name}</title>
-          <link rel="stylesheet" href="stylesheet.css" />
+          {props.css && <link rel="stylesheet" href="stylesheet.css" />}
         </head>
         <body>
           {props.children}
-          <script src="script.js" />
+          {props.js && <script src="script.js" />}
           <div></div>
         </body>
       </html>
