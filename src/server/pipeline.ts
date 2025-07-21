@@ -20,11 +20,14 @@ export type Middleware<C extends Context> = (
 
 export type Decorator<C extends Context, D> = (context: C) => Awaitable<D>;
 
-export type Adapter<T extends string, R> = (context: Context<T>) => R;
-
 export type Handler<T extends string> = (
   context: Context<T>,
 ) => Awaitable<Response>;
+
+export namespace Adapter {
+  export type Input<C extends Context, R> = (context: C) => R;
+  export type Output<C extends Context> = (context: C) => Awaitable<Response>;
+}
 
 export class Pipeline<R extends string, C extends Context<R>> {
   private middlewares: Middleware<any>[];

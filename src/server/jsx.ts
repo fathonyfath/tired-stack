@@ -1,10 +1,10 @@
-import { Adapter, Handler } from "./pipeline";
+import { Adapter, Context } from "./pipeline";
 
-type JSX<T extends string> = Adapter<T, JSX.Element>;
-
-export function jsx<T extends string>(handler: JSX<T>): Handler<T> {
+export function jsx<C extends Context>(
+  adapter: Adapter.Input<C, JSX.Element>,
+): Adapter.Output<C> {
   return async (context) => {
-    const response = await handler(context);
+    const response = await adapter(context);
     return new Response(response, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
