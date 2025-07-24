@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "@kitajs/html";
+import type { PropsWithChildren } from "@kitajs/html";
 
 type Props = { name?: string; css?: boolean; js?: boolean };
 

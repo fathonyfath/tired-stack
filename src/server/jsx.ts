@@ -1,4 +1,4 @@
-import { Adapter, Context } from "./pipeline";
+import type { Adapter, Context } from "./pipeline";
 
 export function jsx<C extends Context>(
   adapter: Adapter.Input<C, JSX.Element>,

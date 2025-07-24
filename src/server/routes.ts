@@ -1,5 +1,5 @@
-import { HTMLBundle, RouterTypes } from "bun";
-import { Context, pipeline, Pipeline } from "./pipeline";
+import type { HTMLBundle, RouterTypes } from "bun";
+import { type Context, pipeline, Pipeline } from "./pipeline";
 
 function isHTMLBundle(value: any): value is HTMLBundle {
   return (

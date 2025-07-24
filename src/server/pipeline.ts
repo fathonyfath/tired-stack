@@ -1,4 +1,4 @@
-import { BunRequest, Server } from "bun";
+import type { BunRequest, Server } from "bun";
 
 type Awaitable<T> = T | Promise<T>;
 type IsNever<T> = [T] extends [never] ? true : false;

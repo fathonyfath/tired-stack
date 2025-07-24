@@ -1,4 +1,4 @@
-import { Context, createDecorator, Decorator } from "./pipeline";
+import { type Context, type Decorator, createDecorator } from "./pipeline";
 
 export type HxSwap =
   | "innerHTML"
