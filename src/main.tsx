@@ -6,6 +6,7 @@ import Layout from "./Layout";
 import Skeleton from "./Skeleton";
 import SimpeBarExample from "./SimpeBarExample";
 import HtmxTest from "./HtmxTest";
+import AsyncJSX from "./AsyncJSX";
 
 const htmxDecoration = htmx();
 
@@ -47,6 +48,7 @@ const server = serve({
         }
         return response;
       }),
+    "/jsx-suspense": (p) => p.handle(jsx(() => AsyncJSX)),
   }),
 });
 
