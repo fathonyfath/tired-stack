@@ -42,7 +42,8 @@ package-lock.json
 **/*.bun
 
 # VSCode stuff
-.vscode/settings.json
+# Settings related to code formatting and TypeScript configuration is committed
+# .vscode/settings.json
 
 # some of the css and js files since it will be compiled anyway
 public/**/*.css

@@ -1,55 +1,38 @@
 import { file, serve } from "bun";
-import { router } from "@server/routes";
-import { jsx } from "@server/jsx";
-import { htmx } from "@server/htmx";
 import Layout from "./Layout";
 import Skeleton from "./Skeleton";
 import SimpeBarExample from "./SimpeBarExample";
 import HtmxTest from "./HtmxTest";
 import AsyncJSX from "./AsyncJSX";
-
-const htmxDecoration = htmx();
+import { withMiddleware, jsx, htmx } from "@server";
 
 const server = serve({
-  routes: router({
-    "/:fileName": (p) =>
-      p.handle((c) => {
-        return new Response(file(`public/${c.request.params.fileName}`));
-      }),
-    "/": (p) =>
-      p.handle(
-        jsx(() => (
-          <Layout name="Hello" js css>
-            <Skeleton />
-          </Layout>
-        )),
-      ),
-    "/simplebar": (p) =>
-      p.handle(
-        jsx(() => (
-          <Layout name="SimpleBar Example" js css>
-            <SimpeBarExample />
-          </Layout>
-        )),
-      ),
-    "/htmx-test": (p) =>
-      p.handle(
-        jsx(() => (
-          <Layout name="HTMX" js>
-            <HtmxTest />
-          </Layout>
-        )),
-      ),
-    "/htmx": (p) =>
-      p.decorate(htmxDecoration).handle((context) => {
-        const response = new Response(JSON.stringify(context.htmx, null, 4));
-        if (context.htmx.isHTMX()) {
-          context.htmx.reswap(response, "innerHTML");
-        }
-        return response;
-      }),
-    "/jsx-suspense": (p) => p.handle(jsx(() => AsyncJSX)),
-  }),
+  routes: {
+    "/:fileName": (req) => new Response(file(`public/${req.params.fileName}`)),
+    "/": jsx(() => (
+      <Layout name="Hello" js css>
+        <Skeleton />
+      </Layout>
+    )),
+    "/simplebar": jsx(() => (
+      <Layout name="SimpleBar Example" js css>
+        <SimpeBarExample />
+      </Layout>
+    )),
+    "/htmx-test": jsx(() => (
+      <Layout name="HTMX" js>
+        <HtmxTest />
+      </Layout>
+    )),
+    "/htmx": withMiddleware([htmx], (req, ser, ctx) => {
+      const response = new Response(JSON.stringify(ctx.htmx, null, 4));
+      if (ctx.htmx.isHTMX()) {
+        ctx.htmx.reswap(response, "innerHTML");
+      }
+      return response;
+    }),
+    "/jsx-suspense": jsx(() => AsyncJSX),
+  },
 });
 
 const cleanup = async () => {
