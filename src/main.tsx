@@ -5,15 +5,19 @@ import SimpeBarExample from "./SimpeBarExample";
 import HtmxTest from "./HtmxTest";
 import AsyncJSX from "./AsyncJSX";
 import { withMiddleware, jsx, htmx } from "@server";
+import { logging } from "./middlewares/logging";
 
 const server = serve({
   routes: {
     "/:fileName": (req) => new Response(file(`public/${req.params.fileName}`)),
-    "/": jsx(() => (
-      <Layout name="Hello" js css>
-        <Skeleton />
-      </Layout>
-    )),
+    "/": withMiddleware(
+      [logging],
+      jsx(() => (
+        <Layout name="Hello" js css>
+          <Skeleton />
+        </Layout>
+      )),
+    ),
     "/simplebar": jsx(() => (
       <Layout name="SimpleBar Example" js css>
         <SimpeBarExample />

@@ -28,7 +28,7 @@ type JSX = JSX.Element | SuspendableJSX;
  */
 export function jsx<Path extends string = string, WS = unknown, Ctx = any>(
   component: (req: BunRequest<Path>, server: Server<WS>, ctx: Ctx) => JSX,
-) {
+): ReturnType<typeof adapter<Path, WS, Ctx>> {
   return adapter<Path, WS, Ctx>(async (req, server, ctx) => {
     const response = await component(req, server, ctx);
     const init: ResponseInit = {
