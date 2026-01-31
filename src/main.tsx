@@ -1,7 +1,5 @@
 import { file, serve } from "bun";
 import Layout from "./Layout";
-import Skeleton from "./Skeleton";
-import SimpeBarExample from "./SimpeBarExample";
 import HtmxTest from "./HtmxTest";
 import AsyncJSX from "./AsyncJSX";
 import { withMiddleware, jsx, htmx } from "@server";
@@ -14,15 +12,10 @@ const server = serve({
       [logging],
       jsx(() => (
         <Layout name="Hello" js css>
-          <Skeleton />
+          <h1>Hello world!</h1>
         </Layout>
       )),
     ),
-    "/simplebar": jsx(() => (
-      <Layout name="SimpleBar Example" js css>
-        <SimpeBarExample />
-      </Layout>
-    )),
     "/htmx-test": jsx(() => (
       <Layout name="HTMX" js>
         <HtmxTest />
