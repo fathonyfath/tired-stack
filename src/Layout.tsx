@@ -16,7 +16,6 @@ export default function (props: PropsWithChildren<Props>): JSX.Element {
         <body>
           {props.children}
           {props.js && <script src="script.js" />}
-          <div></div>
         </body>
       </html>
     </>

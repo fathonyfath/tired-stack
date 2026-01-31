@@ -16,7 +16,7 @@ async function ensureDir(dir: string) {
   }
 }
 
-async function buildCSS(opitons: BuildOptions = {}) {
+async function buildCSS(options: BuildOptions = {}) {
   const inputCSS = "./src/stylesheet.css";
   const outputCSS = "./public/stylesheet.css";
 
@@ -27,7 +27,7 @@ async function buildCSS(opitons: BuildOptions = {}) {
     const presetPlugins = config.plugins;
     const plugins = [
       ...presetPlugins,
-      ...(opitons.minify ? [require("postcss-minify")()] : []),
+      ...(options.minify ? [require("postcss-minify")()] : []),
     ];
 
     const inputStringCSS = await readFile(inputCSS, { encoding: "utf8" });
