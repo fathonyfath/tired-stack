@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "build:js": "node scripts/build-js.js",
+    "build:css": "node scripts/build-css.js",
+    "build:svg": "node scripts/build-icons.js"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.4"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.5",
+    "@tailwindcss/postcss": "^4.1.5",
+    "postcss": "^8.5.3",
+    "postcss-lightningcss": "^1.0.0",
+    "esbuild": "^0.25.4",
+    "svg-sprite": "^2.0.4",
+    "lucide-static": "^0.477.0"
+  }
+}
