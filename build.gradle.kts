@@ -108,7 +108,7 @@ dependencies {
     implementation("io.ktor:ktor-htmx-html")
     implementation("io.ktor:ktor-server-htmx")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
-    implementation("com.googlecode.htmlcompressor:htmlcompressor:1.5.2")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
     testImplementation(kotlin("test"))
 }
 
