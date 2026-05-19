@@ -8,7 +8,9 @@ sealed class SvgPaint {
 
     data object CurrentColor : SvgPaint()
 
-    data class Color(val value: String) : SvgPaint()
+    data class Color(
+        val value: String,
+    ) : SvgPaint()
 
     override fun toString() =
         when (this) {
@@ -18,13 +20,17 @@ sealed class SvgPaint {
         }
 }
 
-enum class StrokeLinecap(val value: String) {
+enum class StrokeLinecap(
+    val value: String,
+) {
     Butt("butt"),
     Round("round"),
     Square("square"),
 }
 
-enum class StrokeLinejoin(val value: String) {
+enum class StrokeLinejoin(
+    val value: String,
+) {
     Miter("miter"),
     Round("round"),
     Bevel("bevel"),
@@ -54,8 +60,8 @@ fun FlowContent.icon(
             |stroke-linejoin="${strokeLinejoin.value}"
             |$classAttr>
             |<use href="/icons.svg#${icon.lucideIcon}"></use>
-            |</svg>"""
-            .trimMargin()
+            |</svg>
+        """.trimMargin()
             .replace(Regex("\n\\s*"), " ")
             .replace(Regex("< "), "<")
             .replace(Regex(" >"), ">")
