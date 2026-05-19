@@ -8,12 +8,12 @@ FAILED=0
 
 if [ -n "$STAGED_KT" ]; then
   echo ">>> ktlint"
-  ./gradlew ktlintCheck --quiet || FAILED=1
+  ./gradlew ktlintCheck -PdiffOnly --quiet || FAILED=1
 fi
 
 if [ -n "$STAGED_WEB" ]; then
   echo ">>> prettier"
-  ./gradlew prettierCheck --quiet || FAILED=1
+  ./gradlew prettierCheck -PdiffOnly --quiet || FAILED=1
 fi
 
 exit $FAILED

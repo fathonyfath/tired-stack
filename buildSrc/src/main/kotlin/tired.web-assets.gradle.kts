@@ -51,16 +51,23 @@ val prettierSources = fileTree("${project.projectDir}/web-assets") {
     include("src/**/*.js", "src/**/*.css", "scripts/**/*.js")
 }
 
+val webDiffFiles: List<String> by lazy {
+    diffFiles(rootDir, project.findProperty("diffBase")?.toString(), project.hasProperty("diffOnly"), ".js", ".css")
+        .map { it.removePrefix("web-assets/") }
+}
+
 val prettierCheck by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
-    args = listOf("run", "lint")
+    args = if (webDiffFiles.isNotEmpty()) listOf("exec", "--", "prettier", "--check") + webDiffFiles
+    else listOf("run", "lint")
     inputs.files(prettierSources)
     inputs.file("${project.projectDir}/web-assets/.prettierrc")
 }
 
 val prettierFormat by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
-    args = listOf("run", "format")
+    args = if (webDiffFiles.isNotEmpty()) listOf("exec", "--", "prettier", "--write") + webDiffFiles
+    else listOf("run", "format")
     inputs.files(prettierSources)
     inputs.file("${project.projectDir}/web-assets/.prettierrc")
 }
