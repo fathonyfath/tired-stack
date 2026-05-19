@@ -1,5 +1,11 @@
 const postcss = require("postcss");
-const { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } = require("fs");
+const {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+  existsSync,
+} = require("fs");
 const crypto = require("crypto");
 const path = require("path");
 const config = require("../postcss.config");

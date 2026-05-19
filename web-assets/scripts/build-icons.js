@@ -11,7 +11,7 @@ const paths = icons
 
 execSync(
   `npx svg-sprite --symbol --symbol-dest=dist/icons --symbol-sprite=icons.svg ${paths}`,
-  { stdio: "inherit" },
+  { stdio: "inherit" }
 );
 
 const svgContent = readFileSync("dist/icons/icons.svg", "utf8");
