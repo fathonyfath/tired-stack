@@ -26,10 +26,10 @@ import io.ktor.server.sse.SSE
 import io.ktor.server.sse.sse
 import io.ktor.sse.ServerSentEvent
 import io.ktor.utils.io.ExperimentalKtorApi
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalKtorApi::class)
 fun main() {
@@ -92,12 +92,22 @@ fun main() {
                 }
             }
             sse("/sse-demo/stream") {
-                send(ServerSentEvent(data = statusHtml("Connected — streaming will begin shortly...", StatusColor.GREEN), event = "status"))
+                send(
+                    ServerSentEvent(
+                        data = statusHtml("Connected — streaming will begin shortly...", StatusColor.GREEN),
+                        event = "status",
+                    ),
+                )
                 delay(1.seconds)
 
                 for (i in 5 downTo 1) {
                     send(ServerSentEvent(data = messageHtml("Countdown: $i..."), event = "message"))
-                    send(ServerSentEvent(data = statusHtml("Streaming — ${i - 1} events remaining", StatusColor.BLUE), event = "status"))
+                    send(
+                        ServerSentEvent(
+                            data = statusHtml("Streaming — ${i - 1} events remaining", StatusColor.BLUE),
+                            event = "status",
+                        ),
+                    )
                     delay(1.seconds)
                 }
 
@@ -109,17 +119,25 @@ fun main() {
 }
 
 private fun messageHtml(text: String): String =
-    createHTML(prettyPrint = false).div(classes = "rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800") {
+    createHTML(
+        prettyPrint = false,
+    ).div(classes = "rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800") {
         +text
     }
 
-private enum class StatusColor(val textClass: String, val dotClass: String) {
+private enum class StatusColor(
+    val textClass: String,
+    val dotClass: String,
+) {
     GREEN("text-green-600", "bg-green-500"),
     BLUE("text-blue-600", "bg-blue-500"),
     GRAY("text-gray-600", "bg-gray-500"),
 }
 
-private fun statusHtml(text: String, color: StatusColor): String =
+private fun statusHtml(
+    text: String,
+    color: StatusColor,
+): String =
     createHTML(prettyPrint = false).span(classes = "inline-flex items-center gap-1.5 text-sm ${color.textClass}") {
         span(classes = "h-2 w-2 rounded-full ${color.dotClass}") {}
         +text
