@@ -63,10 +63,16 @@ Build a fat JAR:
 java -jar build/libs/tired-stack-all.jar
 ```
 
-Or build and run via Docker:
+Build and run via Docker:
 
 ```bash
 ./gradlew runDocker
+```
+
+Push to GHCR (requires `GHCR_USERNAME` and `GHCR_TOKEN` env vars):
+
+```bash
+./gradlew publishImageToExternalRegistry
 ```
 
 ## Git Hooks
