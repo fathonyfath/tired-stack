@@ -48,3 +48,9 @@ tasks.register<Exec>("setupGitHooks") {
     description = "Point git at .githooks so the pre-commit hook runs automatically."
     commandLine("git", "config", "core.hooksPath", ".githooks")
 }
+
+tasks.register("format") {
+    group = "formatting"
+    description = "Formats all source files."
+    dependsOn(tasks.named("ktlintFormat"))
+}
