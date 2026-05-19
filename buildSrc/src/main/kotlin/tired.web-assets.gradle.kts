@@ -65,6 +65,14 @@ val prettierFormat by tasks.registering(NpmTask::class) {
     inputs.file("${project.projectDir}/web-assets/.prettierrc")
 }
 
+tasks.named("check") {
+    dependsOn(prettierCheck)
+}
+
+tasks.named("format") {
+    dependsOn(prettierFormat)
+}
+
 tasks.named<ProcessResources>("processResources") {
     dependsOn(npmBuildCss, npmBuildJs, npmBuildSvg)
     from("${project.projectDir}/web-assets/$distDir/stylesheets") { into("static") }
