@@ -125,19 +125,13 @@ private fun messageHtml(text: String): String =
         +text
     }
 
-private enum class StatusColor(
-    val textClass: String,
-    val dotClass: String,
-) {
+private enum class StatusColor(val textClass: String, val dotClass: String) {
     GREEN("text-green-600", "bg-green-500"),
     BLUE("text-blue-600", "bg-blue-500"),
     GRAY("text-gray-600", "bg-gray-500"),
 }
 
-private fun statusHtml(
-    text: String,
-    color: StatusColor,
-): String =
+private fun statusHtml(text: String, color: StatusColor): String =
     createHTML(prettyPrint = false).span(classes = "inline-flex items-center gap-1.5 text-sm ${color.textClass}") {
         span(classes = "h-2 w-2 rounded-full ${color.dotClass}") {}
         +text
