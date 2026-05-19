@@ -56,8 +56,18 @@ tasks.named("compileKotlin") {
     dependsOn(copyIcons)
 }
 
+tasks.named("runKtlintCheckOverMainSourceSet") {
+    dependsOn(copyIcons)
+}
+
 tasks.test {
     useJUnitPlatform()
+}
+
+ktlint {
+    filter {
+        exclude { element -> element.file.path.contains("/build/generated/") }
+    }
 }
 
 val diffBase = project.findProperty("diffBase")?.toString()
