@@ -42,3 +42,9 @@ tasks.named("compileKotlin") {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("setupGitHooks") {
+    group = "setup"
+    description = "Point git at .githooks so the pre-commit hook runs automatically."
+    commandLine("git", "config", "core.hooksPath", ".githooks")
+}

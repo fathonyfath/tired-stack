@@ -3,12 +3,6 @@ plugins {
     id("tired.web-assets")
 }
 
-tasks.register<Exec>("setupGitHooks") {
-    group = "setup"
-    description = "Point git at .githooks so the pre-commit hook runs automatically."
-    commandLine("git", "config", "core.hooksPath", ".githooks")
-}
-
 dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
