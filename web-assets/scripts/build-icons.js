@@ -1,5 +1,12 @@
 const { execSync } = require("child_process");
-const { readFileSync, renameSync, writeFileSync, existsSync } = require("fs");
+const {
+  readFileSync,
+  renameSync,
+  writeFileSync,
+  existsSync,
+  rmSync,
+  mkdirSync,
+} = require("fs");
 const crypto = require("crypto");
 const path = require("path");
 
@@ -8,6 +15,9 @@ const icons = process.argv[2].split(",");
 const paths = icons
   .map((name) => `node_modules/lucide-static/icons/${name}.svg`)
   .join(" ");
+
+rmSync("dist/icons", { recursive: true, force: true });
+mkdirSync("dist/icons", { recursive: true });
 
 execSync(
   `npx svg-sprite --symbol --symbol-dest=dist/icons --symbol-sprite=icons.svg ${paths}`,

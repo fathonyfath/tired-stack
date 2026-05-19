@@ -11,7 +11,6 @@ node {
 }
 
 val isDev = gradle.startParameter.taskNames.any { it == "run" || it.endsWith(":run") }
-val distDir = if (isDev) "dist/dev" else "dist/prod"
 
 val npmInstallPackage by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmSetup"))
@@ -21,26 +20,26 @@ val npmInstallPackage by tasks.registering(NpmTask::class) {
 val npmBuildCss by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
     args = buildList {
-        addAll(listOf("run", "build:css", "--", "--outdir", "$distDir/stylesheets"))
+        addAll(listOf("run", "build:css", "--", "--outdir", "dist/stylesheets"))
         if (!isDev) add("--minify")
     }
     inputs.dir("${project.projectDir}/web-assets/src")
     inputs.dir("${project.projectDir}/src/main/kotlin")
     inputs.file("${project.projectDir}/web-assets/postcss.config.js")
     inputs.file("${project.projectDir}/web-assets/package.json")
-    outputs.dir("${project.projectDir}/web-assets/$distDir/stylesheets")
+    outputs.dir("${project.projectDir}/web-assets/dist/stylesheets")
 }
 
 val npmBuildJs by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
     args = buildList {
-        addAll(listOf("run", "build:js", "--", "--outdir", "$distDir/scripts"))
+        addAll(listOf("run", "build:js", "--", "--outdir", "dist/scripts"))
         if (!isDev) add("--minify")
     }
     inputs.dir("${project.projectDir}/web-assets/src")
     inputs.file("${project.projectDir}/web-assets/scripts/build-js.js")
     inputs.file("${project.projectDir}/web-assets/package.json")
-    outputs.dir("${project.projectDir}/web-assets/$distDir/scripts")
+    outputs.dir("${project.projectDir}/web-assets/dist/scripts")
 }
 
 val npmBuildSvg by tasks.registering(NpmTask::class) {
@@ -87,8 +86,8 @@ tasks.named("format") {
 
 tasks.named<ProcessResources>("processResources") {
     dependsOn(npmBuildCss, npmBuildJs, npmBuildSvg)
-    from("${project.projectDir}/web-assets/$distDir/stylesheets") { into("static") }
-    from("${project.projectDir}/web-assets/$distDir/scripts") { into("static") }
+    from("${project.projectDir}/web-assets/dist/stylesheets") { into("static") }
+    from("${project.projectDir}/web-assets/dist/scripts") { into("static") }
     from("${project.projectDir}/web-assets/dist/icons") { into("static") }
     from("${project.projectDir}/web-assets/dist/manifest.json")
 }

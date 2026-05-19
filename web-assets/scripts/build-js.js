@@ -1,11 +1,20 @@
 const esbuild = require("esbuild");
-const { writeFileSync, readFileSync, existsSync } = require("fs");
+const {
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+  mkdirSync,
+} = require("fs");
 const path = require("path");
 
 const minify = process.argv.includes("--minify");
 const outdirFlag = process.argv.indexOf("--outdir");
 const outdir =
   outdirFlag !== -1 ? process.argv[outdirFlag + 1] : "dist/scripts";
+
+rmSync(outdir, { recursive: true, force: true });
+mkdirSync(outdir, { recursive: true });
 
 const manifestPath = path.resolve(__dirname, "../dist/manifest.json");
 
