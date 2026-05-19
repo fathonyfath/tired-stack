@@ -85,4 +85,5 @@ tasks.named<ProcessResources>("processResources") {
     from("${project.projectDir}/web-assets/$distDir/stylesheets") { into("static") }
     from("${project.projectDir}/web-assets/$distDir/scripts") { into("static") }
     from("${project.projectDir}/web-assets/dist/icons") { into("static") }
+    from("${project.projectDir}/web-assets/dist/manifest.json")
 }
