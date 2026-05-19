@@ -39,6 +39,17 @@ jobs:
           java-version: "25"
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
+      - name: Cache Node.js download
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/nodejs
+          key: node-${{ runner.os }}-24.15.0
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: web-assets/node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('web-assets/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
       - name: prettier (diff)
         if: github.event_name == 'pull_request'
         run: ./gradlew prettierCheck -PdiffBase=origin/${{ github.base_ref }}
