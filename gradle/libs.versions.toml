@@ -6,6 +6,7 @@ node-gradle = "7.1.0"
 ktlint-gradle = "14.2.0"
 
 [libraries]
+ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder" }
@@ -20,6 +21,5 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
