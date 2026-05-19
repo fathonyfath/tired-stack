@@ -1,5 +1,6 @@
 package dev.fathony.tired.layout
 
+import dev.fathony.tired.assets.AssetManifest
 import kotlinx.html.*
 
 fun HTML.layout(
@@ -13,8 +14,8 @@ fun HTML.layout(
         meta(charset = "utf-8")
         meta(name = "viewport", content = "width=device-width, initial-scale=1")
         title { name?.let { +it } }
-        if (css) link(rel = "stylesheet", href = "stylesheet.css")
-        if (js) script(src = "index.js") { defer = true }
+        if (css) link(rel = "stylesheet", href = AssetManifest.resolve("stylesheet.css"))
+        if (js) script(src = AssetManifest.resolve("index.js")) { defer = true }
     }
     body {
         content()

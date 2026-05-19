@@ -1,6 +1,7 @@
 package dev.fathony.tired.components
 
 import Icons
+import dev.fathony.tired.assets.AssetManifest
 import kotlinx.html.*
 
 sealed class SvgPaint {
@@ -59,7 +60,7 @@ fun FlowContent.icon(
             |stroke-linecap="${strokeLinecap.value}"
             |stroke-linejoin="${strokeLinejoin.value}"
             |$classAttr>
-            |<use href="/icons.svg#${icon.lucideIcon}"></use>
+            |<use href="/${AssetManifest.resolve("icons.svg")}#${icon.lucideIcon}"></use>
             |</svg>
         """.trimMargin()
             .replace(Regex("\n\\s*"), " ")
