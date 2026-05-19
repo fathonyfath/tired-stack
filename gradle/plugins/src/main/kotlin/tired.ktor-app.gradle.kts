@@ -35,7 +35,7 @@ ktor {
             namespace = provider { "fathonyfath" },
         )
 
-        environmentVariable("JAVA_OPTS", "-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport")
+        environmentVariable("JAVA_TOOL_OPTIONS", "--enable-native-access=ALL-UNNAMED -XX:+UseZGC -XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport")
     }
 }
 
