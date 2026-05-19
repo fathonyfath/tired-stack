@@ -13,6 +13,11 @@ node {
 val isDev = gradle.startParameter.taskNames.any { it == "run" || it.endsWith(":run") }
 val distDir = if (isDev) "dist/dev" else "dist/prod"
 
+val npmInstallPackage by tasks.registering(NpmTask::class) {
+    dependsOn(tasks.named("npmSetup"))
+    args = listOf("install", "--save", project.findProperty("package")?.toString() ?: "")
+}
+
 val npmBuildCss by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
     args = buildList {
