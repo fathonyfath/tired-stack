@@ -16,7 +16,7 @@ application {
     mainClass.set("dev.fathony.tired.MainKt")
     // Netty uses native libraries (e.g. epoll, SSL) loaded via System::loadLibrary.
     // JVM 25 restricts this by default — without this flag it warns and will eventually block.
-    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED", "-XX:+UseZGC")
 }
 
 ktor {
