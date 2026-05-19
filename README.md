@@ -72,7 +72,7 @@ Build and run via Docker:
 Push to GHCR (requires `GHCR_USERNAME` and `GHCR_TOKEN` env vars):
 
 ```bash
-./gradlew publishImageToExternalRegistry
+./gradlew publishImage
 ```
 
 ## Git Hooks
