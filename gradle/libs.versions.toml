@@ -11,6 +11,7 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm" }
 ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder" }
 ktor-server-resources = { module = "io.ktor:ktor-server-resources" }
 ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response" }
+ktor-server-sse = { module = "io.ktor:ktor-server-sse" }
 ktor-htmx = { module = "io.ktor:ktor-htmx" }
 ktor-htmx-html = { module = "io.ktor:ktor-htmx-html" }
 ktor-server-htmx = { module = "io.ktor:ktor-server-htmx" }
