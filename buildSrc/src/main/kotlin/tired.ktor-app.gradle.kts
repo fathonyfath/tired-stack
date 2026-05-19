@@ -2,6 +2,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("io.ktor.plugin")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 repositories {
