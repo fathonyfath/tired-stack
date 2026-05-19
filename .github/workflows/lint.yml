@@ -1,0 +1,31 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ktlint:
+    name: Kotlin (ktlint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew ktlintCheck
+
+  prettier:
+    name: JS & CSS (Prettier)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: "25"
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew prettierCheck

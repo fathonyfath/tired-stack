@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+STAGED_KT=$(git diff --cached --name-only --diff-filter=ACM | grep '\.kt$' || true)
+STAGED_WEB=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|css)$' || true)
+
+FAILED=0
+
+if [ -n "$STAGED_KT" ]; then
+  echo ">>> ktlint"
+  ./gradlew ktlintCheck --quiet || FAILED=1
+fi
+
+if [ -n "$STAGED_WEB" ]; then
+  echo ">>> prettier"
+  ./gradlew prettierCheck --quiet || FAILED=1
+fi
+
+exit $FAILED

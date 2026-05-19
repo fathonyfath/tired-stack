@@ -47,6 +47,24 @@ val npmBuildSvg by tasks.registering(NpmTask::class) {
     outputs.dir("${project.projectDir}/web-assets/dist/icons")
 }
 
+val prettierSources = fileTree("${project.projectDir}/web-assets") {
+    include("src/**/*.js", "src/**/*.css", "scripts/**/*.js")
+}
+
+val prettierCheck by tasks.registering(NpmTask::class) {
+    dependsOn(tasks.named("npmInstall"))
+    args = listOf("run", "lint")
+    inputs.files(prettierSources)
+    inputs.file("${project.projectDir}/web-assets/.prettierrc")
+}
+
+val prettierFormat by tasks.registering(NpmTask::class) {
+    dependsOn(tasks.named("npmInstall"))
+    args = listOf("run", "format")
+    inputs.files(prettierSources)
+    inputs.file("${project.projectDir}/web-assets/.prettierrc")
+}
+
 tasks.named<ProcessResources>("processResources") {
     dependsOn(npmBuildCss, npmBuildJs, npmBuildSvg)
     from("${project.projectDir}/web-assets/$distDir/stylesheets") { into("static") }
