@@ -4,11 +4,12 @@ import kotlinx.html.*
 
 data class NavItem(val label: String, val href: String)
 
-val defaultNavItems = listOf(
-    NavItem("Home", "/"),
-    NavItem("HTMX Test", "/htmx-test"),
-    NavItem("HTMX", "/htmx"),
-)
+val defaultNavItems =
+    listOf(
+        NavItem("Home", "/"),
+        NavItem("HTMX Test", "/htmx-test"),
+        NavItem("HTMX", "/htmx"),
+    )
 
 fun BODY.page(
     title: String? = null,

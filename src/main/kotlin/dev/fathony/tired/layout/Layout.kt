@@ -1,15 +1,6 @@
 package dev.fathony.tired.layout
 
-import kotlinx.html.BODY
-import kotlinx.html.HTML
-import kotlinx.html.body
-import kotlinx.html.head
-import kotlinx.html.lang
-import kotlinx.html.link
-import kotlinx.html.meta
-import kotlinx.html.script
-import kotlinx.html.title
-
+import kotlinx.html.*
 
 fun HTML.layout(
     name: String? = null,
