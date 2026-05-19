@@ -2,7 +2,10 @@ package dev.fathony.tired.layout
 
 import kotlinx.html.*
 
-data class NavItem(val label: String, val href: String)
+data class NavItem(
+    val label: String,
+    val href: String,
+)
 
 val defaultNavItems =
     listOf(
