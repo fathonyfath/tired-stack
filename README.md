@@ -56,11 +56,23 @@ Run tests:
 
 ## Building for Production
 
-Build a distribution:
+Build a fat JAR:
 
 ```bash
-./gradlew installDist
-./build/install/tired-stack/bin/tired-stack
+./gradlew buildFatJar
+java -jar build/libs/tired-stack-all.jar
+```
+
+Build and run via Docker:
+
+```bash
+./gradlew runDocker
+```
+
+Push to GHCR (requires `GHCR_USERNAME` and `GHCR_TOKEN` env vars):
+
+```bash
+./gradlew publishImageToExternalRegistry
 ```
 
 ## Git Hooks

@@ -1,7 +1,10 @@
+import io.ktor.plugin.features.DockerImageRegistry
+import io.ktor.plugin.features.DockerPortMapping
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
-    application
+    id("io.ktor.plugin")
     id("org.jlleitschuh.gradle.ktlint")
 }
 
@@ -9,17 +12,31 @@ repositories {
     mavenCentral()
 }
 
-val libs = the<VersionCatalogsExtension>().named("libs")
-
-dependencies {
-    "implementation"(platform(libs.findLibrary("ktor-bom").get()))
-}
-
 application {
     mainClass.set("dev.fathony.tired.MainKt")
     // Netty uses native libraries (e.g. epoll, SSL) loaded via System::loadLibrary.
     // JVM 25 restricts this by default — without this flag it warns and will eventually block.
     applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+}
+
+ktor {
+    docker {
+        jreVersion = JavaVersion.VERSION_25
+        localImageName = "tired-stack"
+        imageTag = "latest"
+        portMappings = listOf(
+            DockerPortMapping(3000, 3000)
+        )
+        externalRegistry = DockerImageRegistry.externalRegistry(
+            username = providers.environmentVariable("GHCR_USERNAME"),
+            password = providers.environmentVariable("GHCR_TOKEN"),
+            project = provider { "tired-stack" },
+            hostname = provider { "ghcr.io" },
+            namespace = provider { "fathonyfath" },
+        )
+
+        environmentVariable("JAVA_OPTS", "-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport")
+    }
 }
 
 kotlin {
