@@ -19,7 +19,7 @@ jobs:
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
       - name: Publish image to GHCR
-        run: ./gradlew publishImageToExternalRegistry
+        run: ./gradlew publishImage
         env:
           GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
