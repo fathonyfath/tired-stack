@@ -29,7 +29,7 @@ kotlin {
 val generatedDir = layout.buildDirectory.dir("generated/kotlin")
 
 val copyIcons by tasks.registering(Copy::class) {
-    from(rootProject.file("buildSrc/src/main/kotlin/Icons.kt"))
+    from(rootProject.file("gradle/plugins/src/main/kotlin/Icons.kt"))
     into(generatedDir)
 }
 

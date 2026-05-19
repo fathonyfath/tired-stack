@@ -56,17 +56,11 @@ Run tests:
 
 ## Building for Production
 
-Build a fat JAR:
+Build a distribution:
 
 ```bash
-./gradlew buildFatJar
-java -jar build/libs/tired-stack-all.jar
-```
-
-Or build and run via Docker:
-
-```bash
-./gradlew runDocker
+./gradlew installDist
+./build/install/tired-stack/bin/tired-stack
 ```
 
 ## Git Hooks
