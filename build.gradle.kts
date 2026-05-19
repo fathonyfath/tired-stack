@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
     implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.auto.head.response)
+    implementation(libs.ktor.server.sse)
     implementation(libs.ktor.htmx)
     implementation(libs.ktor.htmx.html)
     implementation(libs.ktor.server.htmx)

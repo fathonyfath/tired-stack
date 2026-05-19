@@ -12,6 +12,7 @@ val defaultNavItems =
         NavItem("Home", "/"),
         NavItem("HTMX Test", "/htmx-test"),
         NavItem("HTMX", "/htmx"),
+        NavItem("SSE Demo", "/sse-demo"),
     )
 
 fun BODY.page(
