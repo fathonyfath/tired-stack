@@ -43,6 +43,17 @@ tasks.test {
     useJUnitPlatform()
 }
 
+val diffBase = project.findProperty("diffBase")?.toString()
+val diffOnly = project.hasProperty("diffOnly")
+if (diffBase != null || diffOnly) {
+    val ktFiles = diffFiles(rootDir, diffBase, diffOnly, ".kt").map { rootDir.resolve(it) }.toSet()
+    ktlint {
+        filter {
+            include { element -> element.file in ktFiles }
+        }
+    }
+}
+
 tasks.register<Exec>("setupGitHooks") {
     group = "setup"
     description = "Point git at .githooks so the pre-commit hook runs automatically."
