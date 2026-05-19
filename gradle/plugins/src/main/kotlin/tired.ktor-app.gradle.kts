@@ -1,3 +1,6 @@
+import io.ktor.plugin.features.DockerImageRegistry
+import io.ktor.plugin.features.DockerPortMapping
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -18,7 +21,21 @@ application {
 
 ktor {
     docker {
-        jreVersion.set(JavaVersion.VERSION_25)
+        jreVersion = JavaVersion.VERSION_25
+        localImageName = "tired-stack"
+        imageTag = "latest"
+        portMappings = listOf(
+            DockerPortMapping(3000, 3000)
+        )
+        externalRegistry = DockerImageRegistry.externalRegistry(
+            username = providers.environmentVariable("GHCR_USERNAME"),
+            password = providers.environmentVariable("GHCR_TOKEN"),
+            project = provider { "tired-stack" },
+            hostname = provider { "ghcr.io" },
+            namespace = provider { "fathonyfath" },
+        )
+
+        environmentVariable("JAVA_OPTS", "-XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport")
     }
 }
 
@@ -29,7 +46,7 @@ kotlin {
 val generatedDir = layout.buildDirectory.dir("generated/kotlin")
 
 val copyIcons by tasks.registering(Copy::class) {
-    from(rootProject.file("buildSrc/src/main/kotlin/Icons.kt"))
+    from(rootProject.file("gradle/plugins/src/main/kotlin/Icons.kt"))
     into(generatedDir)
 }
 
