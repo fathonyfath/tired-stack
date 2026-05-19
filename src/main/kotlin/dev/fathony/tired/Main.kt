@@ -4,29 +4,25 @@ import dev.fathony.tired.components.icon
 import dev.fathony.tired.layout.layout
 import dev.fathony.tired.layout.page
 import dev.fathony.tired.pages.htmxTest
+import dev.fathony.tired.plugins.respondHtml
 import dev.fathony.tired.routing.Htmx
 import dev.fathony.tired.routing.HtmxTest
 import dev.fathony.tired.routing.Index
 import io.ktor.htmx.HxResponseHeaders
-import io.ktor.server.application.install
-import io.ktor.server.plugins.autohead.AutoHeadResponse
-import io.ktor.server.engine.embeddedServer
 import io.ktor.http.ContentType
-import dev.fathony.tired.plugins.respondHtml
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
 import io.ktor.server.htmx.hx
-import io.ktor.server.response.respondText
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.resources.Resources
 import io.ktor.server.resources.get
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.routing
 import io.ktor.utils.io.ExperimentalKtorApi
-import kotlinx.html.div
-import kotlinx.html.h1
-import kotlinx.html.id
-import kotlinx.html.p
+import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-
 
 @OptIn(ExperimentalKtorApi::class)
 fun main() {

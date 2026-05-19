@@ -1,18 +1,21 @@
 package dev.fathony.tired.components
 
 import Icons
-import kotlinx.html.FlowContent
+import kotlinx.html.*
 
 sealed class SvgPaint {
     data object None : SvgPaint()
+
     data object CurrentColor : SvgPaint()
+
     data class Color(val value: String) : SvgPaint()
 
-    override fun toString() = when (this) {
-        is None -> "none"
-        is CurrentColor -> "currentColor"
-        is Color -> value
-    }
+    override fun toString() =
+        when (this) {
+            is None -> "none"
+            is CurrentColor -> "currentColor"
+            is Color -> value
+        }
 }
 
 enum class StrokeLinecap(val value: String) {
