@@ -1,0 +1,23 @@
+[versions]
+kotlin = "2.3.21"
+ktor = "3.5.0"
+logback = "1.5.18"
+node-gradle = "7.1.0"
+
+[libraries]
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm" }
+ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder" }
+ktor-server-resources = { module = "io.ktor:ktor-server-resources" }
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response" }
+ktor-htmx = { module = "io.ktor:ktor-htmx" }
+ktor-htmx-html = { module = "io.ktor:ktor-htmx-html" }
+ktor-server-htmx = { module = "io.ktor:ktor-server-htmx" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }
