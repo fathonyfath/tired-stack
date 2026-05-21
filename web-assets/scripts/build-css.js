@@ -1,30 +1,22 @@
 const postcss = require("postcss");
-const {
-  readFileSync,
-  writeFileSync,
-  mkdirSync,
-  rmSync,
-  existsSync,
-} = require("fs");
+const { readFileSync, writeFileSync, mkdirSync, rmSync } = require("fs");
 const crypto = require("crypto");
 const path = require("path");
-const config = require("../postcss.config");
 
-const minify = process.argv.includes("--minify");
-const outdirFlag = process.argv.indexOf("--outdir");
-const outdir =
-  outdirFlag !== -1 ? process.argv[outdirFlag + 1] : "dist/stylesheets";
-
-const manifestPath = path.resolve(__dirname, "../dist/manifest.json");
-
-async function build() {
+async function build(input, outdir, meta, minify) {
   rmSync(outdir, { recursive: true, force: true });
   mkdirSync(outdir, { recursive: true });
 
-  const input = readFileSync("src/stylesheet.css", "utf8");
-  const result = await postcss(config.plugins).process(input, {
-    from: "src/stylesheet.css",
-    to: `${outdir}/stylesheet.css`,
+  const plugins = [
+    require("@tailwindcss/postcss")(),
+    require("postcss-lightningcss")({ minify }),
+  ];
+
+  const cssInput = readFileSync(input, "utf8");
+  const filename = path.basename(input);
+  const result = await postcss(plugins).process(cssInput, {
+    from: input,
+    to: `${outdir}/${filename}`,
     map: minify ? false : { inline: false },
   });
 
@@ -32,8 +24,9 @@ async function build() {
     .createHash("md5")
     .update(result.css)
     .digest("hex")
-    .slice(0, 8);
-  const hashedName = `stylesheet-${hash}.css`;
+    .slice(0, 8)
+    .toLowerCase();
+  const hashedName = `${path.basename(input, ".css")}-${hash}.css`;
 
   writeFileSync(`${outdir}/${hashedName}`, result.css);
 
@@ -41,11 +34,33 @@ async function build() {
     writeFileSync(`${outdir}/${hashedName}.map`, result.map.toString());
   }
 
-  const manifest = existsSync(manifestPath)
-    ? JSON.parse(readFileSync(manifestPath, "utf8"))
-    : {};
-  manifest["stylesheet.css"] = hashedName;
-  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  writeFileSync(meta, `${path.basename(input)}=${hashedName}`);
 }
 
-build();
+const { parseArgs } = require("util");
+
+const { values } = parseArgs({
+  options: {
+    input: { type: "string" },
+    outdir: { type: "string" },
+    meta: { type: "string" },
+    minify: { type: "boolean" },
+  },
+});
+
+const missing = ["input", "outdir", "meta"].filter((k) => !values[k]);
+if (missing.length) {
+  console.error(`Missing required args: ${missing.map((k) => `--${k}`).join(", ")}
+
+Usage: build-css.js --input <file> --outdir <dir> --meta <file> [--minify]
+
+  --input   Path to the CSS entry file
+  --outdir  Output directory for compiled CSS
+  --meta    Path to write the output metadata (key=value)
+  --minify  Minify output and skip sourcemaps`);
+  process.exit(1);
+}
+
+const { input, outdir, meta, minify } = values;
+
+build(input, outdir, meta, minify);
