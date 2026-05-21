@@ -37,7 +37,7 @@ function build(icons, outdir, meta) {
     .update(svgContent)
     .digest("hex")
     .slice(0, 8)
-    .toLowerCase();
+    .toUpperCase();
   const hashedName = `icons-${hash}.svg`;
 
   renameSync(`${outdir}/icons.svg`, `${outdir}/${hashedName}`);

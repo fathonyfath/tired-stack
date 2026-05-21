@@ -25,7 +25,7 @@ async function build(input, outdir, meta, minify) {
     .update(result.css)
     .digest("hex")
     .slice(0, 8)
-    .toLowerCase();
+    .toUpperCase();
   const hashedName = `${path.basename(input, ".css")}-${hash}.css`;
 
   writeFileSync(`${outdir}/${hashedName}`, result.css);
