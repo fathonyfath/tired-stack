@@ -10,33 +10,63 @@ const {
 const crypto = require("crypto");
 const path = require("path");
 
-const icons = process.argv[2].split(",");
+function build(icons, outdir, meta) {
+  const missing = icons.filter(
+    (name) => !existsSync(`node_modules/lucide-static/icons/${name}.svg`)
+  );
+  if (missing.length) {
+    console.error(`Unknown icons: ${missing.join(", ")}`);
+    process.exit(1);
+  }
 
-const paths = icons
-  .map((name) => `node_modules/lucide-static/icons/${name}.svg`)
-  .join(" ");
+  const paths = icons
+    .map((name) => `node_modules/lucide-static/icons/${name}.svg`)
+    .join(" ");
 
-rmSync("dist/icons", { recursive: true, force: true });
-mkdirSync("dist/icons", { recursive: true });
+  rmSync(outdir, { recursive: true, force: true });
+  mkdirSync(outdir, { recursive: true });
 
-execSync(
-  `npx svg-sprite --symbol --symbol-dest=dist/icons --symbol-sprite=icons.svg ${paths}`,
-  { stdio: "inherit" }
-);
+  execSync(
+    `npx svg-sprite --symbol --symbol-dest=${outdir} --symbol-sprite=icons.svg ${paths}`,
+    { stdio: "inherit" }
+  );
 
-const svgContent = readFileSync("dist/icons/icons.svg", "utf8");
-const hash = crypto
-  .createHash("md5")
-  .update(svgContent)
-  .digest("hex")
-  .slice(0, 8);
-const hashedName = `icons-${hash}.svg`;
+  const svgContent = readFileSync(`${outdir}/icons.svg`, "utf8");
+  const hash = crypto
+    .createHash("md5")
+    .update(svgContent)
+    .digest("hex")
+    .slice(0, 8)
+    .toUpperCase();
+  const hashedName = `icons-${hash}.svg`;
 
-renameSync("dist/icons/icons.svg", `dist/icons/${hashedName}`);
+  renameSync(`${outdir}/icons.svg`, `${outdir}/${hashedName}`);
 
-const manifestPath = path.resolve(__dirname, "../dist/manifest.json");
-const manifest = existsSync(manifestPath)
-  ? JSON.parse(readFileSync(manifestPath, "utf8"))
-  : {};
-manifest["icons.svg"] = hashedName;
-writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  writeFileSync(meta, `icons.svg=${hashedName}`);
+}
+
+const { parseArgs } = require("util");
+
+const { values } = parseArgs({
+  options: {
+    icons: { type: "string" },
+    outdir: { type: "string" },
+    meta: { type: "string" },
+  },
+});
+
+const missing = ["icons", "outdir", "meta"].filter((k) => !values[k]);
+if (missing.length) {
+  console.error(`Missing required args: ${missing.map((k) => `--${k}`).join(", ")}
+
+Usage: build-icons.js --icons <names> --outdir <dir> --meta <file>
+
+  --icons   Comma-separated list of lucide icon names
+  --outdir  Output directory for compiled SVG sprite
+  --meta    Path to write the output metadata (key=value)`);
+  process.exit(1);
+}
+
+const { icons, outdir, meta } = values;
+
+build(icons.split(","), outdir, meta);
