@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.10"
 ktor = "3.5.2"
-logback = "1.6.1"
+logback = "1.6.3"
 node-gradle = "7.1.0"
 ktlint-gradle = "14.2.0"
 
