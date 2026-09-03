@@ -3,6 +3,14 @@ plugins {
     id("tired.web-assets")
 }
 
+webAssets {
+    icons {
+        add("chevron-down", alias = "Chevron")
+        add("search")
+        add("shopping-cart")
+    }
+}
+
 dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
