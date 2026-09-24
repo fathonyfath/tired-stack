@@ -1,8 +1,7 @@
 # Tired Stack
 
 A server-rendered web stack for people who are tired: Kotlin on the server, HTML that compiles, and just enough
-JavaScript to be dangerous. The previous version used TypeScript, which was abandoned because life is too short
-for JavaScript.
+JavaScript to be dangerous.
 
 - **[Ktor](https://ktor.io)** serves the app: coroutines, typed routes, no Spring.
 - **[KTML](https://github.com/ktool-dev/ktml)** templates are plain HTML that compile to Kotlin functions, so a typo
@@ -32,16 +31,15 @@ app/                        The web app
 ├── build.gradle.kts        Plugins, npm packages, icons, dependencies
 └── src/main/
     ├── kotlin/             Main.kt and one file per feature: route, view classes, handlers
-    ├── ktml/               Templates: pages/, fragments/, layouts/ (and tired/, generated, git-ignored)
+    ├── ktml/               Templates: pages/, fragments/, layouts/
     ├── web/                index.js and stylesheet.css
     └── resources/          logback.xml
 library/                    Runtime helpers the plugin adds to the app: typed KTML views for Ktor
 plugin/                     The tired Gradle plugin, built from source as part of the build
-gradle/libs.versions.toml   Versions for all three
+gradle/libs.versions.toml   Versions
 ```
 
-All the build logic (Ktor and Docker setup, KTML, bundling web assets, icons, linting) lives in
-[`plugin/`](plugin/README.md), so the app's build file only says what the app uses.
+All the build logic lives in [`plugin/`](plugin/README.md), so the app's build file only says what the app uses.
 
 ## How a Page Works
 
@@ -75,9 +73,8 @@ import dev.fathony.tired.features.HomePage
 `<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml); any
 template can be a tag.
 
-The helpers come from the library the plugin adds to the app. [`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt)
-calls `installTired()` once, which installs KTML, typed routes and Server-Sent Events and serves the bundled assets;
-the rest, in [`KtmlView.kt`](library/src/main/kotlin/dev/fathony/tired/ktml/KtmlView.kt), connect views to Ktor:
+[`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt) calls `installTired()` once to set everything up. These
+helpers connect views to Ktor:
 
 | Helper | Use |
 |---|---|
@@ -105,9 +102,8 @@ webAssets {
 ./gradlew npmLatest -Ppackage=htmx.org   # look up the latest version
 ```
 
-Tailwind runs as a PostCSS plugin the app declares itself (`postcss("@tailwindcss/postcss")`); its sources are listed
-at the top of [`stylesheet.css`](app/src/main/web/stylesheet.css). Component libraries built on Tailwind, such as
-Basecoat, are one more `npm(...)` and `@import` away.
+Tailwind runs as a PostCSS plugin (`postcss("@tailwindcss/postcss")`); its sources are listed at the top of
+[`stylesheet.css`](app/src/main/web/stylesheet.css).
 
 Icons are registered by their [Lucide](https://lucide.dev/icons) name:
 
@@ -146,6 +142,3 @@ image:
 ```bash
 docker compose up -d
 ```
-
-Dependencies, including the npm packages in `app/build.gradle.kts` and the build tools inside the plugin, are kept
-up to date by [Renovate](renovate.json).
