@@ -6,6 +6,18 @@
   "reviewers": [
     "fathonyfath"
   ],
+  "packageRules": [
+    {
+      "description": "Maven Central rate-limits Mend's hosted runners, so look up Central artifacts on Google's mirror",
+      "matchDatasources": [
+        "maven"
+      ],
+      "registryUrls": [
+        "https://maven-central.storage-download.googleapis.com/maven2/",
+        "https://plugins.gradle.org/m2/"
+      ]
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
