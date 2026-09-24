@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+import dev.fathony.tired.features.HomePage
+
+<html lang="en" @view="$HomePage">
+<app-layout title="${view.title}">
+    <h1 class="flex items-center gap-2 text-2xl font-bold">
+        <icon name="${view.icon}"/>
+        ${view.title}
+    </h1>
+    <p class="mt-2">Welcome to tired stack.</p>
+</app-layout>
+</html>

@@ -1,0 +1,5 @@
+import dev.fathony.tired.features.SseMessageFragment
+
+<sse-message fragment @view="$SseMessageFragment">
+    <div class="rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">${view.text}</div>
+</sse-message>

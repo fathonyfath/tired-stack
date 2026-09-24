@@ -1,26 +1,39 @@
 [versions]
+tired = "0.1.0-SNAPSHOT"
 kotlin = "2.4.20"
 ktor = "3.6.0"
-logback = "1.6.3"
 node-gradle = "7.1.0"
 ktlint-gradle = "14.2.0"
+ktml = "0.2.3"
+nodejs = "24.15.0"
+logback = "1.6.3"
+junit = "6.1.3"
 
 [libraries]
-ktor-server-core = { module = "io.ktor:ktor-server-core-jvm" }
-ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm" }
-ktor-server-html-builder = { module = "io.ktor:ktor-server-html-builder" }
+ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
+ktor-server-core = { module = "io.ktor:ktor-server-core" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host" }
+ktml-runtime = { module = "dev.ktml:ktml-runtime", version.ref = "ktml" }
+ktml-ktor = { module = "dev.ktml:ktml-ktor", version.ref = "ktml" }
 ktor-server-resources = { module = "io.ktor:ktor-server-resources" }
 ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response" }
 ktor-server-sse = { module = "io.ktor:ktor-server-sse" }
 ktor-htmx = { module = "io.ktor:ktor-htmx" }
-ktor-htmx-html = { module = "io.ktor:ktor-htmx-html" }
 ktor-server-htmx = { module = "io.ktor:ktor-server-htmx" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
+
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin", version.ref = "kotlin" }
+kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+ktor-gradle-plugin = { module = "io.ktor.plugin:io.ktor.plugin.gradle.plugin", version.ref = "ktor" }
+node-gradle-plugin = { module = "com.github.node-gradle.node:com.github.node-gradle.node.gradle.plugin", version.ref = "node-gradle" }
+ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint-gradle" }
+ktml-gradle-plugin = { module = "dev.ktml.gradle:dev.ktml.gradle.gradle.plugin", version.ref = "ktml" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }

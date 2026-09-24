@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<app-layout title="SSE Demo">
+    <div>
+        <h1 class="text-2xl font-bold">SSE Streaming Demo</h1>
+        <p class="mt-2 text-gray-600">
+            This page uses Server-Sent Events to stream HTML from the server in real time.
+        </p>
+        <p class="mt-1 text-gray-600">
+            The server will send a countdown, then a final message — all pushed over a single persistent connection.
+        </p>
+
+        <div class="mt-6" hx-ext="sse" sse-connect="/sse-demo/stream">
+            <div id="sse-messages" sse-swap="message" hx-swap="beforeend" class="space-y-2"></div>
+            <div class="mt-4" id="sse-status" sse-swap="status" hx-swap="innerHTML">
+                <span class="inline-flex items-center gap-1.5 text-sm text-amber-600">
+                    <span class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    Connecting...
+                </span>
+            </div>
+        </div>
+    </div>
+</app-layout>
+</html>

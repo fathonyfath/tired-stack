@@ -1,0 +1,8 @@
+import dev.fathony.tired.features.SseStatusFragment
+
+<sse-status fragment @view="$SseStatusFragment">
+    <span class="inline-flex items-center gap-1.5 text-sm ${view.color.textClass}">
+        <span class="h-2 w-2 rounded-full ${view.color.dotClass}"></span>
+        ${view.text}
+    </span>
+</sse-status>

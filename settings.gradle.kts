@@ -1,5 +1,5 @@
 pluginManagement {
-    includeBuild("gradle/plugins")
+    includeBuild("plugin")
     repositories {
         gradlePluginPortal()
     }
@@ -10,3 +10,10 @@ plugins {
 }
 
 rootProject.name = "tired-stack"
+
+/**
+ * Substituted for `dev.fathony.tired:tired-library`, which the tired plugin adds to apps.
+ */
+includeBuild("library")
+
+include(":app")

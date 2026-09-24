@@ -1,4 +1,4 @@
-name: Lint
+name: Check
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  lint:
-    name: Lint
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -19,15 +19,17 @@ jobs:
       - name: Cache Node.js download
         uses: actions/cache@v6
         with:
-          path: ~/.gradle/nodejs
-          key: node-${{ runner.os }}-24.15.0
+          path: |
+            .gradle/nodejs
+            app/.gradle/nodejs
+          key: node-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
       - name: Cache node_modules
         uses: actions/cache@v6
         with:
-          path: web-assets/node_modules
-          key: npm-${{ runner.os }}-${{ hashFiles('web-assets/package-lock.json') }}
+          path: |
+            app/build/tired/web-assets/node_modules
+            plugin/src/main/resources/dev/fathony/tired/toolchain/node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('app/build.gradle.kts', 'gradle/libs.versions.toml', 'plugin/src/main/resources/dev/fathony/tired/toolchain/package-lock.json') }}
           restore-keys: npm-${{ runner.os }}-
-      - name: ktlint
-        run: ./gradlew ktlintCheck
-      - name: prettier
-        run: ./gradlew prettierCheck
+      - name: check
+        run: ./gradlew check

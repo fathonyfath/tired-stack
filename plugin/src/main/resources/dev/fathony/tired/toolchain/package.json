@@ -1,0 +1,15 @@
+{
+  "name": "tired-web-assets",
+  "private": true,
+  "scripts": {
+    "build:js": "node scripts/build-js.js",
+    "build:css": "node scripts/build-css.js",
+    "build:svg": "node scripts/build-icons.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "lucide-static": "^1.0.0",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3"
+  }
+}
