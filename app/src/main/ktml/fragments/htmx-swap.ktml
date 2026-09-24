@@ -1,0 +1,7 @@
+import dev.fathony.tired.features.HtmxSwapFragment
+
+<htmx-swap fragment @view="$HtmxSwapFragment">
+    <div id="htmx" class="p-4 border border-green-400 bg-green-50 mt-4">
+        HTMX fragment response — swapped in at ${view.renderedAt}
+    </div>
+</htmx-swap>

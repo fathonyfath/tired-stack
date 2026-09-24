@@ -7,11 +7,7 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/gradle/plugins" name="plugins">
-                <projects>
-                  <project path="$PROJECT_DIR$/gradle/plugins" />
-                </projects>
-              </build>
+              <build path="$PROJECT_DIR$/plugin" name="tired-gradle-plugin" />
             </builds>
           </compositeBuild>
         </compositeConfiguration>
@@ -19,7 +15,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/gradle/plugins" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/library" />
+            <option value="$PROJECT_DIR$/plugin" />
           </set>
         </option>
         <option name="myGradleHome" value="" />

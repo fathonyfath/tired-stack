@@ -1,0 +1,9 @@
+import Icons
+
+<icon name="$Icons" size="${Int = 24}" class="${String? = null}" fill="${String = 'none'}"
+      stroke="${String = 'currentColor'}" strokeWidth="${Int = 2}">
+    <svg width="$size" height="$size" fill="$fill" stroke="$stroke" stroke-width="$strokeWidth"
+         stroke-linecap="round" stroke-linejoin="round" class="$`class`">
+        <use href="/${AssetManifest.icons_svg}#${name.lucideIcon}"></use>
+    </svg>
+</icon>

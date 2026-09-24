@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-STAGED_KT=$(git diff --cached --name-only --diff-filter=ACM | grep '\.kt$' || true)
+STAGED_KT=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.kts?$' || true)
 STAGED_WEB=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|css)$' || true)
 
 FAILED=0

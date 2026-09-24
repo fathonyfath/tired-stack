@@ -1,5 +1,35 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
-  "reviewers": ["fathonyfath"]
+  "extends": [
+    "config:recommended"
+  ],
+  "reviewers": [
+    "fathonyfath"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "npm packages declared with webAssets { npm(\"name\", \"version\") }",
+      "managerFilePatterns": [
+        "/(^|/)build\\.gradle\\.kts$/"
+      ],
+      "matchStrings": [
+        "npm\\(\"(?<depName>[^\"]+)\",\\s*\"(?<currentValue>[^\"]+)\"\\)"
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "The Node.js version in the version catalog; node versioning only offers LTS releases",
+      "managerFilePatterns": [
+        "/(^|/)gradle/libs\\.versions\\.toml$/"
+      ],
+      "matchStrings": [
+        "\\nnodejs = \"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version",
+      "versioningTemplate": "node"
+    }
+  ]
 }

@@ -1,0 +1,27 @@
+<app-layout title="$String" content="$Content">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>${title}</title>
+        <link rel="stylesheet" href="${AssetManifest.stylesheet_css}">
+        <script src="${AssetManifest.index_js}" defer></script>
+    </head>
+    <body>
+    <div class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+        <header class="border-b bg-white px-6 py-4">
+            <nav class="mx-auto flex max-w-4xl items-center justify-between">
+                <span class="text-lg font-semibold tracking-tight">${title}</span>
+                <div class="flex items-center gap-6">
+                    <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Home</a>
+                    <a href="/htmx-test" class="text-sm text-gray-600 hover:text-gray-900">HTMX Test</a>
+                    <a href="/htmx" class="text-sm text-gray-600 hover:text-gray-900">HTMX</a>
+                    <a href="/sse-demo" class="text-sm text-gray-600 hover:text-gray-900">SSE Demo</a>
+                </div>
+            </nav>
+        </header>
+        <main class="mx-auto max-w-4xl px-6 py-8">
+            $content
+        </main>
+    </div>
+    </body>
+</app-layout>

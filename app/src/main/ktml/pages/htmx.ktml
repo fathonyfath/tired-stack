@@ -1,0 +1,6 @@
+<!DOCTYPE html>
+<html lang="en">
+<app-layout title="HTMX">
+    <p>This is the full page response for /htmx (browser access).</p>
+</app-layout>
+</html>
