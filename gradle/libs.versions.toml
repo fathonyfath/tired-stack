@@ -5,7 +5,7 @@ ktor = "3.6.0"
 node-gradle = "7.1.0"
 ktlint-gradle = "14.2.0"
 ktml = "0.2.3"
-nodejs = "24.15.0"
+nodejs = "24.21.0"
 logback = "1.6.3"
 junit = "6.1.3"
 
