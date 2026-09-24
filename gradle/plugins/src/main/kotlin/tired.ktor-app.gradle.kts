@@ -43,23 +43,6 @@ kotlin {
     jvmToolchain(25)
 }
 
-val generatedDir = layout.buildDirectory.dir("generated/kotlin")
-
-val copyIcons by tasks.registering(Copy::class) {
-    from(rootProject.file("gradle/plugins/src/main/kotlin/Icons.kt"))
-    into(generatedDir)
-}
-
-sourceSets["main"].kotlin.srcDir(generatedDir)
-
-tasks.named("compileKotlin") {
-    dependsOn(copyIcons)
-}
-
-tasks.named("runKtlintCheckOverMainSourceSet") {
-    dependsOn(copyIcons)
-}
-
 tasks.test {
     useJUnitPlatform()
 }

@@ -6,6 +6,8 @@ plugins {
 
 val webAssetsDir = "${project.projectDir}/web-assets"
 
+val webAssets = extensions.create<WebAssetsExtension>("webAssets")
+
 node {
     download = true
     version = "24.15.0"
@@ -71,13 +73,63 @@ val npmBuildJs by tasks.registering(NpmTask::class) {
 
 val npmBuildSvg by tasks.registering(NpmTask::class) {
     dependsOn(tasks.named("npmInstall"))
-    val icons = Icons.entries.joinToString(",") { it.lucideIcon }
-    args =
-        listOf("run", "build:svg", "--", "--icons", icons, "--outdir", "dist/icons", "--meta", "dist/meta/icons.meta")
+    args.set(
+        webAssets.icons.constants.map { icons ->
+            listOf(
+                "run",
+                "build:svg",
+                "--",
+                "--icons",
+                icons.keys.sorted().joinToString(","),
+                "--outdir",
+                "dist/icons",
+                "--meta",
+                "dist/meta/icons.meta"
+            )
+        }
+    )
     inputs.file("$webAssetsDir/scripts/build-icons.js")
     inputs.dir("$webAssetsDir/node_modules/lucide-static/icons")
     outputs.dir("$webAssetsDir/dist/icons")
     outputs.file("$webAssetsDir/dist/meta/icons.meta")
+}
+
+val generateIcons by tasks.registering {
+    val icons = webAssets.icons.constants
+    inputs.property("icons", icons)
+
+    val outputDir = layout.buildDirectory.dir("generated/source/icons")
+    outputs.dir(outputDir)
+
+    doLast {
+        val byConstant = icons.get().entries.groupBy({ it.value }, { it.key })
+        val clashes = byConstant.filterValues { it.size > 1 }
+        if (clashes.isNotEmpty()) {
+            val detail = clashes.entries.joinToString("; ") { (constant, lucideIcons) ->
+                "${lucideIcons.sorted().joinToString(" and ")} both map to '$constant'"
+            }
+            throw GradleException("Clashing icon constants: $detail. Pass alias = \"...\" to disambiguate.")
+        }
+
+        val constants = byConstant.entries
+            .sortedBy { it.key }
+            .joinToString("\n") { (constant, lucideIcons) ->
+                "    $constant(\"${lucideIcons.single()}\"),"
+            }
+
+        val content =
+            """
+            |enum class Icons(
+            |    val lucideIcon: String,
+            |) {
+            |$constants
+            |}
+            """.trimMargin()
+
+        val outDir = outputDir.get().asFile
+        outDir.mkdirs()
+        outDir.resolve("Icons.kt").writeText(content)
+    }
 }
 
 val generateAssetManifest by tasks.registering {
@@ -127,6 +179,7 @@ val generateAssetManifest by tasks.registering {
 extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
     sourceSets.named("main") {
         kotlin.srcDir(generateAssetManifest)
+        kotlin.srcDir(generateIcons)
     }
 }
 
