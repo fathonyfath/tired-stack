@@ -8,7 +8,7 @@ JavaScript to be dangerous.
   in a template fails the build instead of the page.
 - **[HTMX](https://htmx.org)** swaps server-rendered fragments into the page, including over Server-Sent Events.
 - **[Tailwind CSS v4](https://tailwindcss.com)** styles it, picking up classes from Kotlin and templates alike.
-- **[Lucide](https://lucide.dev)** icons are bundled into one SVG sprite and exposed as a type-safe `Icons` enum.
+- **[Lucide](https://lucide.dev)** icons are exposed as a type-safe `Icons` enum, and the SVG sprite only keeps the ones you use.
 - **Gradle** runs everything, including Node.js: there is no `npm install` and no `package.json` to maintain.
 
 ## Installation
@@ -58,7 +58,7 @@ are rebuilt on save: refresh the browser to see them. Changes to Kotlin code nee
 
 ```
 app/                        The web app
-├── build.gradle.kts        Plugins, npm packages, icons, dependencies
+├── build.gradle.kts        Plugins, npm packages, dependencies
 └── src/main/
     ├── kotlin/             Main.kt and one file per feature: route, view classes, handlers
     ├── ktml/               Templates: pages/, fragments/, layouts/
@@ -118,8 +118,9 @@ The [HTMX demo](app/src/main/kotlin/dev/fathony/tired/features/HtmxDemo.kt) and
 ## Styles, Scripts and Icons
 
 `app/src/main/web/index.js` and `stylesheet.css` are bundled by esbuild into hashed files, referenced from templates
-through the generated `AssetManifest`. npm packages, Tailwind (as a PostCSS plugin) and Lucide icons are declared in
+through the generated `AssetManifest`. npm packages and Tailwind (as a PostCSS plugin) are declared in
 [`app/build.gradle.kts`](app/build.gradle.kts); the [plugin README](plugin/README.md) has the full set of options.
+Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps the ones you use.
 
 ## Commands
 

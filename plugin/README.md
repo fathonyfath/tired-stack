@@ -69,19 +69,18 @@ browser refresh shows the change without a restart.
 
 ## Icons
 
-```kotlin
-icons {
-    add("search")                          // Icons.Search
-    add("chevron-down", alias = "Chevron") // Icons.Chevron
-}
-```
-
-The sprite is exposed as `AssetManifest.icons_svg`. With KTML, templates can use the generated `<icon>` tag:
+Every [Lucide](https://lucide.dev/icons) icon is an `Icons` constant, named in PascalCase: `search` is `Icons.Search`
+and `shopping-cart` is `Icons.ShoppingCart`. There's nothing to declare. The sprite is exposed as
+`AssetManifest.icons_svg`. With KTML, templates can use the generated `<icon>` tag:
 
 ```html
 <icon name="Icons.Search" class="size-4"/>
 <icon name="${view.icon}"/>
 ```
+
+Under `./gradlew run`, the sprite holds every icon, so a new one shows up on refresh. Other builds only keep the icons
+that `src/main/kotlin` and `src/main/ktml` mention as `Icons.Name`. An icon reached any other way, such as a star
+import or `Icons.valueOf`, works under `run` but is missing from the built sprite.
 
 ## PostCSS
 

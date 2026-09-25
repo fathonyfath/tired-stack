@@ -1,75 +1,105 @@
 package dev.fathony.tired
 
 import com.github.gradle.node.npm.task.NpmTask
-import dev.fathony.tired.icons.IconsExtension
+import dev.fathony.tired.icons.ICON_REFERENCE
+import dev.fathony.tired.icons.constantName
+import dev.fathony.tired.icons.readLucideIcons
 import dev.fathony.tired.internal.readResource
 import dev.fathony.tired.webassets.ToolchainPart
 import dev.fathony.tired.webassets.WEB_ASSETS_BUILD_DIR
 import dev.fathony.tired.webassets.WebAssetsExtension
+import dev.fathony.tired.webassets.isRunBuild
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 /**
- * Lucide icons: one sprite, the `Icons` enum and, with KTML, the `<icon>` tag.
+ * Lucide icons: every icon as an `Icons` constant, one sprite and, with KTML, the `<icon>` tag.
  */
 plugins {
     id("dev.fathony.tired.web-assets")
 }
 
-val icons = extensions.create<IconsExtension>("icons")
 the<WebAssetsExtension>().toolchainParts.add(ToolchainPart.ICONS)
 
 val webAssetsDir = layout.buildDirectory.dir(WEB_ASSETS_BUILD_DIR)
 
+val lucideTags = webAssetsDir.map { it.file("node_modules/lucide-static/tags.json") }
+
+/**
+ * Generated sources are left out: they're derived from these, and scanning them would depend on the sprite.
+ */
+val iconSources =
+    files(
+        provider {
+            val kotlinDirs =
+                the<KotlinJvmProjectExtension>()
+                    .sourceSets
+                    .getByName("main")
+                    .kotlin.srcDirs
+                    .filterNot { it.startsWith(layout.buildDirectory.get().asFile) }
+            kotlinDirs + file("src/main/ktml")
+        },
+    ).asFileTree.matching { include("**/*.kt", "**/*.ktml") }
+
+/**
+ * Every icon under `run`, so any `Icons` constant shows up on refresh; otherwise only those the sources reference.
+ */
+val listIcons =
+    tasks.register("listIcons") {
+        dependsOn(tasks.named("npmInstall"))
+        val tags = lucideTags
+        val all = isRunBuild
+        val sources = iconSources
+        inputs.file(tags)
+        inputs.property("all", all)
+        if (!all) inputs.files(sources)
+
+        val output = webAssetsDir.map { it.file("icons.list") }
+        outputs.file(output)
+
+        doLast {
+            val icons = readLucideIcons(tags.get().asFile)
+            val used =
+                if (all) {
+                    icons
+                } else {
+                    val byConstant = icons.associateBy { constantName(it) }
+                    sources.files
+                        .flatMap { source -> ICON_REFERENCE.findAll(source.readText()).map { it.groupValues[1] } }
+                        .mapNotNull { byConstant[it] }
+                        .distinct()
+                        .sorted()
+                }
+            output.get().asFile.writeText(used.joinToString("\n"))
+        }
+    }
+
 val npmBuildSvg =
     tasks.register<NpmTask>("npmBuildSvg") {
         dependsOn(tasks.named("npmInstall"))
+        val stable = if (isRunBuild) listOf("--stable") else emptyList()
         args.set(
-            icons.constants.map { constants ->
-                listOf(
-                    "run",
-                    "build:svg",
-                    "--",
-                    "--icons",
-                    constants.keys.sorted().joinToString(","),
-                    "--outdir",
-                    "dist/icons",
-                    "--meta",
-                    "dist/meta/icons.meta",
-                )
-            },
+            listOf("run", "build:svg", "--", "--icons", "icons.list", "--outdir", "dist/icons", "--meta", "dist/meta/icons.meta") +
+                stable,
         )
-        inputs.property("icons", icons.constants)
-        inputs.files(tasks.named("prepareWebAssetsToolchain"))
+        inputs.files(listIcons, tasks.named("prepareWebAssetsToolchain"))
         outputs.dir(webAssetsDir.map { it.dir("dist/icons") })
         outputs.file(webAssetsDir.map { it.file("dist/meta/icons.meta") })
-        onlyIf("icons are registered") { icons.constants.get().isNotEmpty() }
     }
 
 val generateIcons =
     tasks.register("generateIcons") {
-        val constants = icons.constants
-        inputs.property("icons", constants)
+        dependsOn(tasks.named("npmInstall"))
+        val tags = lucideTags
+        inputs.file(tags)
 
         val outputDir = layout.buildDirectory.dir("generated/source/icons")
         outputs.dir(outputDir)
 
         doLast {
-            val byConstant = constants.get().entries.groupBy({ it.value }, { it.key })
-            val clashes = byConstant.filterValues { it.size > 1 }
-            if (clashes.isNotEmpty()) {
-                val detail =
-                    clashes.entries.joinToString("; ") { (constant, lucideIcons) ->
-                        "${lucideIcons.sorted().joinToString(" and ")} both map to '$constant'"
-                    }
-                throw GradleException("Clashing icon constants: $detail. Pass alias = \"...\" to disambiguate.")
-            }
-
             val entries =
-                byConstant.entries
-                    .sortedBy { it.key }
-                    .joinToString("\n") { (constant, lucideIcons) ->
-                        "    $constant(\"${lucideIcons.single()}\"),"
-                    }
+                readLucideIcons(tags.get().asFile).joinToString("\n") { lucideIcon ->
+                    "    ${constantName(lucideIcon)}(\"$lucideIcon\"),"
+                }
 
             val content =
                 """
@@ -126,4 +156,5 @@ pluginManager.withPlugin("dev.ktml.gradle") {
      * Copied along with `src/main/ktml` for PostCSS.
      */
     tasks.named("syncWebAssetsSources") { dependsOn(generateIconTag) }
+    listIcons { dependsOn(generateIconTag) }
 }

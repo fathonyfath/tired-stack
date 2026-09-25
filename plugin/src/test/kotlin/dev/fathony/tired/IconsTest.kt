@@ -6,6 +6,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class IconsTest {
     @TempDir
@@ -16,70 +17,43 @@ class IconsTest {
     @BeforeTest
     fun setUp() {
         project = TestProject(dir)
-    }
-
-    private fun icons(block: String) =
         project.buildScript(
             """
             plugins {
                 id("dev.fathony.tired")
                 id("dev.fathony.tired.icons")
             }
-
-            icons {
-                $block
-            }
             """,
         )
+    }
 
     @Test
-    fun `icons become enum constants`() {
-        icons(
-            """
-            add("search")
-            add("chevron-down", alias = "Chevron")
-            add("shopping-cart")
-            """,
-        )
-
+    fun `every lucide icon becomes a constant`() {
         project.build("generateIcons")
 
         val icons = project.read("build/generated/source/icons/Icons.kt")
-        assertContains(icons, """Chevron("chevron-down"),""")
         assertContains(icons, """Search("search"),""")
         assertContains(icons, """ShoppingCart("shopping-cart"),""")
+        assertContains(icons, """ArrowDown01("arrow-down-0-1"),""")
+        assertFalse("\"arrow-down-01\"" in icons, "deprecated aliases are left out")
     }
 
     @Test
-    fun `clashing constants fail the build`() {
-        icons(
-            """
-            add("arrow-down-0-1")
-            add("arrow-down-01")
-            """,
-        )
+    fun `the sprite only holds icons the sources reference`() {
+        project.file("src/main/kotlin/Main.kt", "val icon = Icons.Search\nval notAnIcon = Icons.NotAnIcon\n")
+        project.file("src/main/ktml/pages/cart.ktml", """<icon name="Icons.ShoppingCart"/>""")
 
-        val result = project.fail("generateIcons")
+        project.build("npmBuildSvg")
 
-        assertContains(
-            result.output,
-            "Clashing icon constants: arrow-down-0-1 and arrow-down-01 both map to 'ArrowDown01'",
-        )
-    }
-
-    @Test
-    fun `aliases must be kotlin identifiers`() {
-        icons("""add("search", alias = "1search")""")
-
-        val result = project.fail("generateIcons")
-
-        assertContains(result.output, "Icon 'search' maps to '1search', which is not a valid Kotlin identifier.")
+        assertEquals("search\nshopping-cart", project.read("$WEB_ASSETS/icons.list"))
+        val sprite = File(dir, "$WEB_ASSETS/dist/icons").listFiles()!!.single().readText()
+        assertContains(sprite, """<symbol id="search"""")
+        assertContains(sprite, """<symbol id="shopping-cart"""")
+        assertFalse("chevron-down" in sprite)
     }
 
     @Test
     fun `the icon tag is written to a self-ignoring folder`() {
-        icons("""add("search")""")
-
         project.build("generateIconTag")
 
         assertContains(project.read("src/main/ktml/tired/icon.ktml"), "<icon name=\"\$Icons\"")

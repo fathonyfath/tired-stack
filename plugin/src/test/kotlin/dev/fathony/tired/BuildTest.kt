@@ -7,6 +7,7 @@ import java.util.jar.Manifest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -33,10 +34,6 @@ class BuildTest {
 
             application {
                 mainClass = "MainKt"
-            }
-
-            icons {
-                add("search")
             }
 
             tasks.register("printRunClasspath") {
@@ -106,7 +103,24 @@ class BuildTest {
             project.read("build/resources/main/static/${names.getValue("icons_svg")}"),
             """<symbol id="search"""",
         )
+        assertEquals(
+            1,
+            Regex(
+                "<symbol ",
+            ).findAll(project.read("build/resources/main/static/${names.getValue("icons_svg")}")).count(),
+        )
         assertContains(project.read("build/ktml/main/dev/ktml/templates/pages/Home.kt"), "writeIcon(")
+    }
+
+    @Test
+    fun `run serves every icon under a stable name`() {
+        project.build("run")
+
+        assertContains(
+            project.read("build/generated/source/webAssets/AssetManifest.kt"),
+            """const val icons_svg = "icons.svg"""",
+        )
+        assertContains(project.read("build/resources/main/static/icons.svg"), """<symbol id="shopping-cart"""")
     }
 
     @Test
