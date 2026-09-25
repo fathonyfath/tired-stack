@@ -131,13 +131,14 @@ The [plugin README](plugin/README.md) has the full set of options.
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
 | `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
-| `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
+| `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
 ## Deployment
 
 Every push to `main` is checked and published to GHCR by GitHub Actions
-([`lint.yml`](.github/workflows/lint.yml), [`publish.yml`](.github/workflows/publish.yml)). To run the published
-image:
+([`lint.yml`](.github/workflows/lint.yml), [`publish.yml`](.github/workflows/publish.yml)), tagged `latest` and
+`sha-<commit>`. A weekly [`cleanup.yml`](.github/workflows/cleanup.yml) deletes untagged images and keeps the 10
+newest tagged ones. To run the published image:
 
 ```bash
 docker compose up -d

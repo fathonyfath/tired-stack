@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/fathonyfath/tired-stack:latest
+    image: ghcr.io/fathonyfath/tired-stack-sample:latest
     ports:
       - "3000:3000"
     environment:

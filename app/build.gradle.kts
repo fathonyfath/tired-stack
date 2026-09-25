@@ -11,15 +11,36 @@ application {
 
 ktor {
     docker {
-        localImageName = "tired-stack"
+        localImageName = "tired-stack-sample"
         externalRegistry =
             DockerImageRegistry.externalRegistry(
                 username = providers.environmentVariable("GHCR_USERNAME"),
                 password = providers.environmentVariable("GHCR_TOKEN"),
-                project = provider { "tired-stack" },
+                project = provider { "tired-stack-sample" },
                 hostname = provider { "ghcr.io" },
                 namespace = provider { "fathonyfath" },
             )
+    }
+}
+
+/**
+ * In CI, also tags the image with its commit next to Ktor's `latest`. The labels replace the base image's on the
+ * GHCR package page, and the source label links the package to this repo.
+ */
+val commit = providers.environmentVariable("GITHUB_SHA").orNull
+
+jib {
+    to {
+        tags = setOfNotNull(commit?.let { "sha-${it.take(7)}" })
+    }
+    container {
+        labels =
+            buildMap {
+                put("org.opencontainers.image.title", "tired-stack-sample")
+                put("org.opencontainers.image.description", "The sample app of the Tired Stack")
+                put("org.opencontainers.image.source", "https://github.com/fathonyfath/tired-stack")
+                commit?.let { put("org.opencontainers.image.revision", it) }
+            }
     }
 }
 
