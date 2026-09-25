@@ -149,5 +149,5 @@ Every push to `main` is checked and the sample is published to GHCR, tagged `lat
 docker compose up -d
 ```
 
-Pushing a `v*` tag publishes the plugin and library to maven.fathony.dev
-([`release.yml`](.github/workflows/release.yml)).
+Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
+[plugin README](plugin/README.md#development).

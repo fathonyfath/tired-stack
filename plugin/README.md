@@ -139,11 +139,13 @@ To publish the plugin locally:
 ./gradlew -p plugin publishToMavenLocal
 ```
 
-To release, push a `v*` tag. [`release.yml`](../.github/workflows/release.yml) runs the checks, then publishes the
-plugin and `tired-library` at the tag's version:
+To release, run the [Bump Version](../.github/workflows/bump.yml) workflow and pick `patch`, `minor` or `major`:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+gh workflow run bump.yml -f bump=minor                         # from main
+gh workflow run bump.yml -f bump=patch --ref release/1.x      # patch an older major
 ```
 
-A version can only be published once; to fix a release, tag a new version.
+It takes the latest `v*` tag on the branch it runs on, runs the checks, publishes the plugin and `tired-library` at
+the next version, then creates the tag and a GitHub Release. Run it on `main` for new releases, or on a
+`release/<major>.x` branch to patch an older major. A version can only be published once.

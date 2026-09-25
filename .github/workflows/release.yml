@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_call:
+    inputs:
+      version:
+        description: Version to publish, without the leading v
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -27,9 +33,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Publish plugin and library
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${VERSION:-${GITHUB_REF_NAME#v}}"
           ./gradlew -p plugin publishAllPublicationsToReposiliteRepository -Ptired.version="$version"
           ./gradlew -p library publishAllPublicationsToReposiliteRepository -Ptired.version="$version"
         env:
+          VERSION: ${{ inputs.version }}
           ORG_GRADLE_PROJECT_reposiliteUsername: ${{ secrets.REPOSILITE_USERNAME }}
           ORG_GRADLE_PROJECT_reposilitePassword: ${{ secrets.REPOSILITE_TOKEN }}
