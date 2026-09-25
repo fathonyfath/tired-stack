@@ -5,11 +5,19 @@ on:
     branches: [main]
 
 permissions:
+  contents: read
   packages: write
 
+concurrency:
+  group: publish-image
+
 jobs:
+  check:
+    uses: ./.github/workflows/lint.yml
+
   publish:
     name: Build & Push to GHCR
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
