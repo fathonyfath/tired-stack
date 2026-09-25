@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check:
-    uses: ./.github/workflows/lint.yml
+    uses: ./.github/workflows/check.yml
 
   publish:
     name: Build & Push to GHCR
