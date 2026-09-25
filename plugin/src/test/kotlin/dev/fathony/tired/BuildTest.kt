@@ -23,15 +23,12 @@ class BuildTest {
     fun setUp() {
         project = TestProject(dir)
         publishLibraryStub()
+        project.file("gradle.properties", "tiredRepository=library-repo")
         project.buildScript(
             """
             plugins {
                 id("dev.fathony.tired")
                 id("dev.fathony.tired.icons")
-            }
-
-            repositories {
-                maven(uri("library-repo"))
             }
 
             application {
@@ -72,7 +69,7 @@ class BuildTest {
     }
 
     /**
-     * The plugin adds tired-library, which isn't published yet; the app doesn't use it, so an empty jar will do.
+     * The plugin adds tired-library from `tiredRepository`; the app doesn't use it, so an empty jar will do.
      */
     private fun publishLibraryStub() {
         val version = System.getProperty("tired.version")
@@ -110,6 +107,13 @@ class BuildTest {
             """<symbol id="search"""",
         )
         assertContains(project.read("build/ktml/main/dev/ktml/templates/pages/Home.kt"), "writeIcon(")
+    }
+
+    @Test
+    fun `resolves tired-library from the plugin's repository`() {
+        val compile = project.build("dependencies", "--configuration", "compileClasspath").output
+        assertContains(compile, "dev.fathony.tired:tired-library:${System.getProperty("tired.version")}")
+        assertFalse("FAILED" in compile, "tired-library did not resolve:\n$compile")
     }
 
     @Test

@@ -10,8 +10,8 @@ plugins {
 }
 ```
 
-Releases are published to [maven.fathony.dev](https://maven.fathony.dev). The plugin comes from there and so does
-`tired-library`, which it adds to the app:
+Releases are published to [maven.fathony.dev](https://maven.fathony.dev). The plugin comes from there, and it
+declares the repository itself for `tired-library`, which it adds to the app:
 
 ```kotlin
 // settings.gradle.kts
@@ -19,13 +19,6 @@ pluginManagement {
     repositories {
         maven("https://maven.fathony.dev/releases")
         gradlePluginPortal()
-    }
-}
-
-dependencyResolutionManagement {
-    repositories {
-        maven("https://maven.fathony.dev/releases")
-        mavenCentral()
     }
 }
 ```

@@ -13,21 +13,14 @@ JavaScript to be dangerous.
 
 ## Installation
 
-Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository in
-`settings.gradle.kts`, for the plugin and for `tired-library`, which the plugin adds to the app:
+Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository to
+`pluginManagement` in `settings.gradle.kts`; the plugin declares it for `tired-library`, which it adds to the app:
 
 ```kotlin
 pluginManagement {
     repositories {
         maven("https://maven.fathony.dev/releases")
         gradlePluginPortal()
-    }
-}
-
-dependencyResolutionManagement {
-    repositories {
-        maven("https://maven.fathony.dev/releases")
-        mavenCentral()
     }
 }
 ```

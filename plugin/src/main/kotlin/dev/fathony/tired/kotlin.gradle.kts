@@ -11,8 +11,15 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
 }
 
+/**
+ * Project repositories make Gradle ignore the ones in settings, so tired-library's repository is declared here.
+ * `tiredRepository` overrides it, for tests.
+ */
 repositories {
     mavenCentral()
+    maven(project.findProperty("tiredRepository") ?: "https://maven.fathony.dev/releases") {
+        mavenContent { includeGroup("dev.fathony.tired") }
+    }
 }
 
 kotlin {
