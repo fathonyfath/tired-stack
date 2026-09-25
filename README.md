@@ -11,7 +11,45 @@ JavaScript to be dangerous.
 - **[Lucide](https://lucide.dev)** icons are bundled into one SVG sprite and exposed as a type-safe `Icons` enum.
 - **Gradle** runs everything, including Node.js: there is no `npm install` and no `package.json` to maintain.
 
-## Getting Started
+## Installation
+
+Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev), readable without
+credentials. Add the repository in `settings.gradle.kts`, for the plugin and for `tired-library`, which the plugin
+adds to the app:
+
+```kotlin
+pluginManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        mavenCentral()
+    }
+}
+```
+
+Then apply it in the app's `build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("dev.fathony.tired") version "0.1.0"
+    id("dev.fathony.tired.icons") version "0.1.0"  // optional
+}
+
+application {
+    mainClass = "com.example.MainKt"
+}
+```
+
+Templates go in `src/main/ktml`, and the script and stylesheet in `src/main/web`. Call `installTired()` in your Ktor
+module. The [plugin README](plugin/README.md) covers the options.
+
+## Try the Sample
 
 You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
 
@@ -87,38 +125,9 @@ The [HTMX demo](app/src/main/kotlin/dev/fathony/tired/features/HtmxDemo.kt) and
 
 ## Styles, Scripts and Icons
 
-`app/src/main/web/index.js` and `stylesheet.css` are bundled by esbuild into hashed files. Templates reference them
-through the generated `AssetManifest` (`AssetManifest.index_js`, `AssetManifest.stylesheet_css`).
-
-npm packages are declared in `app/build.gradle.kts` with exact versions, then imported as usual:
-
-```kotlin
-webAssets {
-    npm("htmx.org", "2.0.11")
-}
-```
-
-```bash
-./gradlew npmLatest -Ppackage=htmx.org   # look up the latest version
-```
-
-Tailwind runs as a PostCSS plugin (`postcss("@tailwindcss/postcss")`); its sources are listed at the top of
-[`stylesheet.css`](app/src/main/web/stylesheet.css).
-
-Icons are registered by their [Lucide](https://lucide.dev/icons) name:
-
-```kotlin
-icons {
-    add("search")                           // Icons.Search
-    add("chevron-down", alias = "Chevron")  // Icons.Chevron
-}
-```
-
-```html
-<icon name="Icons.Search" class="size-4"/>
-```
-
-The [plugin README](plugin/README.md) has the full set of options.
+`app/src/main/web/index.js` and `stylesheet.css` are bundled by esbuild into hashed files, referenced from templates
+through the generated `AssetManifest`. npm packages, Tailwind (as a PostCSS plugin) and Lucide icons are declared in
+[`app/build.gradle.kts`](app/build.gradle.kts); the [plugin README](plugin/README.md) has the full set of options.
 
 ## Commands
 
@@ -127,7 +136,6 @@ The [plugin README](plugin/README.md) has the full set of options.
 | `./gradlew run` | Run the app on port 3000; templates, CSS and JS rebuild on save (refresh to see them) |
 | `./gradlew check` | ktlint, Prettier and all tests |
 | `./gradlew format` | Format Kotlin, JavaScript and CSS |
-| `./gradlew test` | Run the tests of the app, library and plugin |
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
 | `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
@@ -135,11 +143,12 @@ The [plugin README](plugin/README.md) has the full set of options.
 
 ## Deployment
 
-Every push to `main` is checked and published to GHCR by GitHub Actions
-([`lint.yml`](.github/workflows/lint.yml), [`publish.yml`](.github/workflows/publish.yml)), tagged `latest` and
-`sha-<commit>`. A weekly [`cleanup.yml`](.github/workflows/cleanup.yml) deletes untagged images and keeps the 10
-newest tagged ones. To run the published image:
+Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`
+([`publish.yml`](.github/workflows/publish.yml)). To run it:
 
 ```bash
 docker compose up -d
 ```
+
+Pushing a `v*` tag publishes the plugin and library to maven.fathony.dev
+([`release.yml`](.github/workflows/release.yml)).
