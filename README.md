@@ -103,14 +103,14 @@ import dev.fathony.tired.features.HomePage
 `<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml); any
 template can be a tag.
 
-[`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt) calls `installTired()` once to set everything up. These
-helpers connect views to Ktor:
+[`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt) calls `installTired()` once to set up KTML and serve the
+web assets, and installs `Resources` and `SSE` for the helpers that need them. These helpers connect views to Ktor:
 
 | Helper | Use |
 |---|---|
-| `page<Route> { view }` | A route that only renders a view |
+| `page<Route> { view }` | A route that only renders a view; needs `Resources` |
 | `call.respondView(view)` | Render a page or fragment from any handler, e.g. an HTMX request |
-| `sendView(event, view)` | Send a rendered fragment as a Server-Sent Event |
+| `sendView(event, view)` | Send a rendered fragment as a Server-Sent Event; needs `SSE` |
 
 The [HTMX demo](app/src/main/kotlin/dev/fathony/tired/features/HtmxDemo.kt) and
 [SSE demo](app/src/main/kotlin/dev/fathony/tired/features/SseDemo.kt) show the fragment side.

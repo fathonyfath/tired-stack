@@ -12,8 +12,6 @@ import io.ktor.server.resources.get
 import io.ktor.server.response.respondTextWriter
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RoutingContext
-import io.ktor.server.sse.ServerSSESession
-import io.ktor.sse.ServerSentEvent
 import java.io.Writer
 
 /**
@@ -44,11 +42,6 @@ suspend fun Application.renderView(view: KtmlView): String =
 
 inline fun <reified R : Any> Route.page(noinline view: suspend RoutingContext.(R) -> KtmlView): Route =
     get<R> { call.respondView(view(it)) }
-
-suspend fun ServerSSESession.sendView(
-    event: String,
-    view: KtmlView,
-) = send(ServerSentEvent(data = call.application.renderView(view).trim(), event = event))
 
 private class WriterContentWriter(
     private val out: Writer,
