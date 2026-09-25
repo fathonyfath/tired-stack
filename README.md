@@ -13,9 +13,8 @@ JavaScript to be dangerous.
 
 ## Installation
 
-Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev), readable without
-credentials. Add the repository in `settings.gradle.kts`, for the plugin and for `tired-library`, which the plugin
-adds to the app:
+Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository in
+`settings.gradle.kts`, for the plugin and for `tired-library`, which the plugin adds to the app:
 
 ```kotlin
 pluginManagement {

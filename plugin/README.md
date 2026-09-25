@@ -10,8 +10,8 @@ plugins {
 }
 ```
 
-Releases are published to [maven.fathony.dev](https://maven.fathony.dev), readable without credentials. The plugin
-comes from there and so does `tired-library`, which it adds to the app:
+Releases are published to [maven.fathony.dev](https://maven.fathony.dev). The plugin comes from there and so does
+`tired-library`, which it adds to the app:
 
 ```kotlin
 // settings.gradle.kts
