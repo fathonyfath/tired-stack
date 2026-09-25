@@ -4,6 +4,7 @@
 plugins {
     id("dev.fathony.tired.kotlin")
     `java-library`
+    `maven-publish`
 }
 
 /**
@@ -13,6 +14,27 @@ apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
 group = "dev.fathony.tired"
 version = libs.versions.tired.get()
+
+java {
+    withSourcesJar()
+}
+
+/**
+ * Credentials come from `reposiliteUsername` and `reposilitePassword`, set by the release workflow.
+ */
+publishing {
+    publications {
+        create<MavenPublication>("library") {
+            from(components["java"])
+        }
+    }
+    repositories {
+        maven("https://maven.fathony.dev/releases") {
+            name = "reposilite"
+            credentials(PasswordCredentials::class)
+        }
+    }
+}
 
 dependencies {
     api(platform(libs.ktor.bom))

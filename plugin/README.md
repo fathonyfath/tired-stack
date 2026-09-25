@@ -5,8 +5,28 @@ tooling such as Tailwind is added by the app through PostCSS.
 
 ```kotlin
 plugins {
-    id("dev.fathony.tired")            // Ktor app + KTML + web assets
-    id("dev.fathony.tired.icons")      // optional: Lucide icons
+    id("dev.fathony.tired") version "0.1.0"        // Ktor app + KTML + web assets
+    id("dev.fathony.tired.icons") version "0.1.0"  // optional: Lucide icons
+}
+```
+
+Releases are published to [maven.fathony.dev](https://maven.fathony.dev). The plugin comes from there and so does
+`tired-library`, which it adds to the app:
+
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        mavenCentral()
+    }
 }
 ```
 
@@ -118,3 +138,14 @@ To publish the plugin locally:
 ```bash
 ./gradlew -p plugin publishToMavenLocal
 ```
+
+To release, run the [Bump Version](../.github/workflows/bump.yml) workflow and pick `patch`, `minor` or `major`:
+
+```bash
+gh workflow run bump.yml -f bump=minor                         # from main
+gh workflow run bump.yml -f bump=patch --ref release/1.x      # patch an older major
+```
+
+It takes the latest `v*` tag on the branch it runs on, runs the checks, publishes the plugin and `tired-library` at
+the next version, then creates the tag and a GitHub Release. Run it on `main` for new releases, or on a
+`release/<major>.x` branch to patch an older major. A version can only be published once.
