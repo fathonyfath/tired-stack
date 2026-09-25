@@ -39,10 +39,16 @@ publishing {
 dependencies {
     api(platform(libs.ktor.bom))
     api(libs.ktor.server.core)
-    api(libs.ktor.server.resources)
-    api(libs.ktor.server.sse)
     api(libs.ktml.runtime)
     api(libs.ktml.ktor)
 
+    /**
+     * For `page` and `sendView`; apps that use them add these and install the plugins themselves.
+     */
+    compileOnly(libs.ktor.server.resources)
+    compileOnly(libs.ktor.server.sse)
+
+    testImplementation(libs.ktor.server.resources)
+    testImplementation(libs.ktor.server.sse)
     testImplementation(libs.ktor.server.test.host)
 }

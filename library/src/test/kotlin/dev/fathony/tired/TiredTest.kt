@@ -16,6 +16,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.withCharset
 import io.ktor.resources.Resource
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.resources.Resources
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.sse.sse
@@ -25,6 +27,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import io.ktor.server.sse.SSE as ServerSSE
 
 data class Greeting(
     val name: String,
@@ -87,6 +90,7 @@ class TiredTest {
         testApplication {
             application {
                 tired()
+                install(Resources)
                 routing { page<Greet> { Greeting("page") } }
             }
 
@@ -98,6 +102,7 @@ class TiredTest {
         testApplication {
             application {
                 tired()
+                install(ServerSSE)
                 routing { sse("/events") { sendView("greeting", Greeting("sse")) } }
             }
 
