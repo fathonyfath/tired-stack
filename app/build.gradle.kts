@@ -53,12 +53,6 @@ webAssets {
     postcss("@tailwindcss/postcss")
 }
 
-icons {
-    add("chevron-down", alias = "Chevron")
-    add("search")
-    add("shopping-cart")
-}
-
 dependencies {
     implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.auto.head.response)
