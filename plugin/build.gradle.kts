@@ -13,6 +13,18 @@ repositories {
 group = "dev.fathony.tired"
 version = libs.versions.tired.get()
 
+/**
+ * Credentials come from `reposiliteUsername` and `reposilitePassword`, set by the release workflow.
+ */
+publishing {
+    repositories {
+        maven("https://maven.fathony.dev/releases") {
+            name = "reposilite"
+            credentials(PasswordCredentials::class)
+        }
+    }
+}
+
 dependencies {
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.serialization.gradle.plugin)

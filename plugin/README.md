@@ -5,8 +5,28 @@ tooling such as Tailwind is added by the app through PostCSS.
 
 ```kotlin
 plugins {
-    id("dev.fathony.tired")            // Ktor app + KTML + web assets
-    id("dev.fathony.tired.icons")      // optional: Lucide icons
+    id("dev.fathony.tired") version "0.1.0"        // Ktor app + KTML + web assets
+    id("dev.fathony.tired.icons") version "0.1.0"  // optional: Lucide icons
+}
+```
+
+Releases are published to [maven.fathony.dev](https://maven.fathony.dev), readable without credentials. The plugin
+comes from there and so does `tired-library`, which it adds to the app:
+
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven("https://maven.fathony.dev/releases")
+        mavenCentral()
+    }
 }
 ```
 
@@ -118,3 +138,12 @@ To publish the plugin locally:
 ```bash
 ./gradlew -p plugin publishToMavenLocal
 ```
+
+To release, push a `v*` tag. [`release.yml`](../.github/workflows/release.yml) runs the checks, then publishes the
+plugin and `tired-library` at the tag's version:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+A version can only be published once; to fix a release, tag a new version.
