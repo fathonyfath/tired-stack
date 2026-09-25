@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   check:
-    uses: ./.github/workflows/lint.yml
+    uses: ./.github/workflows/check.yml
 
   publish:
     name: Publish to maven.fathony.dev
