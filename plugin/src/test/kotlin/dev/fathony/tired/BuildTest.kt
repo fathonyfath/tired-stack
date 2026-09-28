@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 /**
@@ -84,41 +85,57 @@ class BuildTest {
         JarOutputStream(folder.resolve("tired-library-$version.jar").outputStream(), Manifest()).close()
     }
 
+    /**
+     * The asset names `AssetManifest` holds, by constant.
+     */
+    private fun assetNames(): Map<String, String> {
+        val manifest = project.read("build/generated/source/webAssets/AssetManifest.kt")
+        return listOf("stylesheet_css", "index_js", "icons_svg").associateWith { name ->
+            Regex("""const val $name = "([^"]+)"""").find(manifest)?.groupValues?.get(1)
+                ?: error("AssetManifest has no $name:\n$manifest")
+        }
+    }
+
     @Test
     fun `builds hashed assets, icons and templates into the app`() {
         project.build("assemble")
 
-        val manifest = project.read("build/generated/source/webAssets/AssetManifest.kt")
-        val names =
-            listOf("stylesheet_css", "index_js", "icons_svg").associateWith { name ->
-                Regex("""const val $name = "([^"]+)"""").find(manifest)?.groupValues?.get(1)
-                    ?: error("AssetManifest has no $name:\n$manifest")
-            }
-        assertTrue(names.getValue("stylesheet_css").matches(Regex("""stylesheet-[0-9A-Z]{8}\.css""")))
-        assertTrue(names.getValue("index_js").matches(Regex("""index-[0-9A-Z]{8}\.js""")))
-        assertTrue(names.getValue("icons_svg").matches(Regex("""icons-[0-9A-Z]{8}\.svg""")))
+        val names = assetNames()
+        val stylesheet = names.getValue("stylesheet_css")
+        val script = names.getValue("index_js")
+        val icons = names.getValue("icons_svg")
+        assertTrue(stylesheet.matches(Regex("""stylesheet-[0-9A-Z]{8}\.css""")), "stylesheet_css is $stylesheet")
+        assertTrue(script.matches(Regex("""index-[0-9A-Z]{8}\.js""")), "index_js is $script")
+        assertTrue(icons.matches(Regex("""icons-[0-9A-Z]{8}\.svg""")), "icons_svg is $icons")
         names.values.forEach { assertTrue(project.exists("build/resources/main/static/$it"), "$it is not in static") }
 
-        assertContains(
-            project.read("build/resources/main/static/${names.getValue("icons_svg")}"),
-            """<symbol id="search"""",
-        )
-        assertEquals(
-            1,
-            Regex(
-                "<symbol ",
-            ).findAll(project.read("build/resources/main/static/${names.getValue("icons_svg")}")).count(),
-        )
+        val sprite = project.read("build/resources/main/static/$icons")
+        val symbols = Regex("""<symbol id="([^"]+)"""").findAll(sprite).map { it.groupValues[1] }.toList()
+        assertEquals(listOf("search"), symbols)
         assertContains(project.read("build/ktml/main/dev/ktml/templates/pages/Home.kt"), "writeIcon(")
     }
 
     @Test
-    fun `run serves every icon under a stable name`() {
+    fun `hashed names change with the content`() {
+        project.build("assemble")
+        val before = assetNames()
+
+        project.file("src/main/web/stylesheet.css", "body {\n  margin: 1px;\n}\n")
+        project.file("src/main/web/index.js", "console.log(\"changed\");\n")
+        project.file("src/main/kotlin/Icon.kt", "val cart = Icons.ShoppingCart")
+        project.build("assemble")
+        val after = assetNames()
+
+        before.forEach { (name, old) -> assertNotEquals(old, after.getValue(name), "$name kept its name") }
+    }
+
+    @Test
+    fun `run serves assets under stable names and every icon`() {
         project.build("run")
 
-        assertContains(
-            project.read("build/generated/source/webAssets/AssetManifest.kt"),
-            """const val icons_svg = "icons.svg"""",
+        assertEquals(
+            mapOf("stylesheet_css" to "stylesheet.css", "index_js" to "index.js", "icons_svg" to "icons.svg"),
+            assetNames(),
         )
         assertContains(project.read("build/resources/main/static/icons.svg"), """<symbol id="shopping-cart"""")
     }
