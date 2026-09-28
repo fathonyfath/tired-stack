@@ -21,7 +21,6 @@ class WebAssetsTest {
         project.file("src/main/web/index.js", "console.log(1);")
         project.file("src/main/kotlin/Main.kt", "fun main() {}")
         project.file("src/main/ktml/pages/page.ktml", "<html></html>")
-        project.file("src/main/resources/templates/mail.html", "<p class=\"underline\"></p>")
     }
 
     @Test
@@ -74,6 +73,7 @@ class WebAssetsTest {
 
     @Test
     fun `kotlin and ktml sources are mirrored with postcss`() {
+        project.file("src/main/resources/templates/mail.html", "<p class=\"underline\"></p>")
         project.buildScript(
             """
             plugins { id("dev.fathony.tired") }
@@ -92,6 +92,7 @@ class WebAssetsTest {
 
     @Test
     fun `mirror adds folders to the copy`() {
+        project.file("src/main/resources/templates/mail.html", "<p class=\"underline\"></p>")
         project.buildScript(
             """
             plugins { id("dev.fathony.tired") }
