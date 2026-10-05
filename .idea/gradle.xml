@@ -7,7 +7,16 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/plugin" name="tired-gradle-plugin" />
+              <build path="$PROJECT_DIR$/library" name="tired-library">
+                <projects>
+                  <project path="$PROJECT_DIR$/library" />
+                </projects>
+              </build>
+              <build path="$PROJECT_DIR$/plugin" name="tired-gradle-plugin">
+                <projects>
+                  <project path="$PROJECT_DIR$/plugin" />
+                </projects>
+              </build>
             </builds>
           </compositeBuild>
         </compositeConfiguration>
