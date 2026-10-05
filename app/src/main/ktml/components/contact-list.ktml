@@ -1,0 +1,18 @@
+import dev.fathony.tired.features.ContactRowsFragment
+
+<contact-list rows="$ContactRowsFragment">
+    <li each="${contact in rows.contacts}" class="flex items-center justify-between gap-4 px-4 py-3">
+        <div class="min-w-0">
+            <p class="truncate font-medium">${contact.name}</p>
+            <p class="truncate text-sm text-gray-600">${contact.email}</p>
+        </div>
+        <button type="button" hx-delete="/contacts/${contact.id}" hx-target="closest li" hx-swap="delete"
+                class="text-sm text-red-600 hover:text-red-800">
+            Delete
+        </button>
+    </li>
+    <li if="${rows.next != null}" hx-get="${rows.next}" hx-trigger="revealed" hx-swap="outerHTML"
+        class="px-4 py-3 text-sm text-gray-500">
+        Loading more…
+    </li>
+</contact-list>

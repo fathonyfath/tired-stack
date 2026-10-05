@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+import dev.fathony.tired.features.TicketsPage
+
+<html lang="en" @view="$TicketsPage">
+<app-layout title="Tickets">
+    <h1 class="text-2xl font-bold">Tickets</h1>
+    <p class="mt-2 text-gray-600">
+        A hold keeps one seat aside for a short while; confirming it sells the seat, and a seat is never sold twice.
+    </p>
+    <tickets-summary panel="${view.panel}"/>
+</app-layout>
+</html>

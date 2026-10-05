@@ -60,4 +60,5 @@ dependencies {
     implementation(libs.ktor.htmx)
     implementation(libs.ktor.server.htmx)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.sqlite.jdbc)
 }

@@ -1,0 +1,33 @@
+import dev.fathony.tired.features.TicketsPanelFragment
+
+<tickets-summary panel="$TicketsPanelFragment">
+    <div id="tickets" class="mt-6">
+        <div class="flex gap-4">
+            <div class="flex-1 rounded-md border bg-white px-4 py-3">
+                <p class="text-sm text-gray-600">Free</p>
+                <p class="text-3xl font-bold" data-tally="free">${panel.tally.free}</p>
+            </div>
+            <div class="flex-1 rounded-md border bg-white px-4 py-3">
+                <p class="text-sm text-gray-600">Held</p>
+                <p class="text-3xl font-bold" data-tally="held">${panel.tally.held}</p>
+            </div>
+            <div class="flex-1 rounded-md border bg-white px-4 py-3">
+                <p class="text-sm text-gray-600">Sold</p>
+                <p class="text-3xl font-bold" data-tally="sold">${panel.tally.sold}</p>
+            </div>
+        </div>
+
+        <p if="${panel.refusal != null}" class="mt-4 text-sm text-red-600">${panel.refusal}</p>
+        <p if="${panel.ticket != null}" class="mt-4 text-sm text-green-700">
+            Seat ${panel.ticket?.seat} is yours.
+        </p>
+        <div if="${panel.hold != null}" class="mt-4 flex items-center justify-between rounded-md border bg-white px-4 py-3">
+            <p class="text-sm">Seat ${panel.hold?.seat} is held for you until ${panel.hold?.until}.</p>
+            <button hx-post="/tickets/holds/${panel.hold?.token}/confirm" hx-target="#tickets" hx-swap="outerHTML"
+                    class="rounded-md bg-gray-900 px-4 py-2 text-white hover:bg-gray-700">Confirm</button>
+        </div>
+
+        <button hx-post="/tickets/holds" hx-target="#tickets" hx-swap="outerHTML"
+                class="mt-6 rounded-md border bg-white px-4 py-2 hover:bg-gray-100">Hold a seat</button>
+    </div>
+</tickets-summary>

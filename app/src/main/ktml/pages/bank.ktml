@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+import dev.fathony.tired.features.BankPage
+
+<html lang="en" @view="$BankPage">
+<app-layout title="Bank">
+    <h1 class="text-2xl font-bold">Bank</h1>
+    <p class="mt-2 text-gray-600">
+        Every posting is one transaction: a transfer moves both balances or neither, and a form sent twice counts once.
+    </p>
+    <bank-summary panel="${view.panel}"/>
+</app-layout>
+</html>

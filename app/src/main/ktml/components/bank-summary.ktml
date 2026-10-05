@@ -1,0 +1,62 @@
+import dev.fathony.tired.features.BankPanelFragment
+
+<bank-summary panel="$BankPanelFragment">
+    <div id="bank" class="mt-6">
+        <div class="flex gap-4">
+            <div each="${account in panel.statement.accounts}" class="flex-1 rounded-md border bg-white px-4 py-3">
+                <p class="text-sm text-gray-600">${account.name}</p>
+                <p class="text-3xl font-bold">${account.balance}</p>
+            </div>
+        </div>
+        <p if="${panel.refusal != null}" class="mt-4 text-sm text-red-600">${panel.refusal}</p>
+
+        <form hx-post="/bank" hx-target="#bank" hx-swap="outerHTML" class="mt-6 flex gap-2">
+            <input type="hidden" name="key" value="${panel.movementKey}">
+            <select name="account" class="rounded-md border bg-white px-3 py-2">
+                <option each="${account in panel.statement.accounts}" value="${account.id}">${account.name}</option>
+            </select>
+            <input name="amount" type="number" min="1" step="1" placeholder="Amount" required
+                   class="min-w-0 flex-1 rounded-md border bg-white px-3 py-2">
+            <button name="kind" value="deposit"
+                    class="rounded-md bg-gray-900 px-4 py-2 text-white hover:bg-gray-700">Deposit</button>
+            <button name="kind" value="withdraw"
+                    class="rounded-md border bg-white px-4 py-2 hover:bg-gray-100">Withdraw</button>
+        </form>
+
+        <form hx-post="/bank" hx-target="#bank" hx-swap="outerHTML" class="mt-2 flex items-center gap-2">
+            <input type="hidden" name="key" value="${panel.transferKey}">
+            <input type="hidden" name="kind" value="transfer">
+            <select name="from" class="rounded-md border bg-white px-3 py-2">
+                <option each="${account in panel.statement.accounts}" value="${account.id}">${account.name}</option>
+            </select>
+            <span class="text-sm text-gray-600">to</span>
+            <select name="to" class="rounded-md border bg-white px-3 py-2">
+                <option each="${account in panel.statement.accounts.reversed()}" value="${account.id}">${account.name}</option>
+            </select>
+            <input name="amount" type="number" min="1" step="1" placeholder="Amount" required
+                   class="min-w-0 flex-1 rounded-md border bg-white px-3 py-2">
+            <button class="rounded-md bg-gray-900 px-4 py-2 text-white hover:bg-gray-700">Transfer</button>
+        </form>
+
+        <table class="mt-6 w-full rounded-md border bg-white text-sm">
+            <thead>
+            <tr class="border-b text-left text-gray-600">
+                <th class="px-4 py-2 font-medium">When</th>
+                <th class="px-4 py-2 font-medium">Account</th>
+                <th class="px-4 py-2 text-right font-medium">Previous</th>
+                <th class="px-4 py-2 text-right font-medium">Change</th>
+                <th class="px-4 py-2 text-right font-medium">Balance</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y">
+            <tr each="${entry in panel.statement.entries}">
+                <td class="px-4 py-2 text-gray-600">${entry.at}</td>
+                <td class="px-4 py-2">${entry.account}</td>
+                <td class="px-4 py-2 text-right">${entry.previous}</td>
+                <td class="px-4 py-2 text-right">${entry.change}</td>
+                <td class="px-4 py-2 text-right font-medium">${entry.balance}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</bank-summary>

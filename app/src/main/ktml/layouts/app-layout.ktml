@@ -15,6 +15,9 @@
                     <a href="/" class="text-sm text-gray-600 hover:text-gray-900">Home</a>
                     <a href="/htmx-test" class="text-sm text-gray-600 hover:text-gray-900">HTMX Test</a>
                     <a href="/htmx" class="text-sm text-gray-600 hover:text-gray-900">HTMX</a>
+                    <a href="/contacts" class="text-sm text-gray-600 hover:text-gray-900">Contacts</a>
+                    <a href="/bank" class="text-sm text-gray-600 hover:text-gray-900">Bank</a>
+                    <a href="/tickets" class="text-sm text-gray-600 hover:text-gray-900">Tickets</a>
                     <a href="/sse-demo" class="text-sm text-gray-600 hover:text-gray-900">SSE Demo</a>
                 </div>
             </nav>

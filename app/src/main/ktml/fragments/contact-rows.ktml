@@ -1,0 +1,5 @@
+import dev.fathony.tired.features.ContactRowsFragment
+
+<contact-rows fragment @view="$ContactRowsFragment">
+    <contact-list rows="$view"/>
+</contact-rows>
