@@ -10,14 +10,33 @@
   ],
   "packageRules": [
     {
-      "description": "Merge the weekly non-major group once Check passes; majors still wait for review",
+      "description": "Merge the weekly non-major group once Check passes; majors and 0.x minors still wait for review",
       "matchUpdateTypes": [
         "minor",
         "patch",
         "pin",
         "digest"
       ],
+      "matchCurrentVersion": "!/^0\\./",
+      "minimumReleaseAge": "3 days",
       "automerge": true
+    },
+    {
+      "description": "A 0.x patch is still safe to merge",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "matchCurrentVersion": "/^0\\./",
+      "minimumReleaseAge": "3 days",
+      "automerge": true
+    },
+    {
+      "description": "Keep 0.x minors out of the weekly group so they don't hold it back",
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "matchCurrentVersion": "/^0\\./",
+      "groupName": null
     },
     {
       "description": "Maven Central rate-limits Mend's hosted runners, so look up Central artifacts on Google's mirror",
