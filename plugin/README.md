@@ -159,6 +159,10 @@ Requirements:
 
 The base image is `gcr.io/distroless/java-base-debian12`; `ktor.docker.customBaseImage` changes it.
 
+The heap is capped at 35% of the container's memory, because the executable needs room next to it; GraalVM's own
+default of 80% gets a small container killed under load. `-Xmx` as an argument to the executable overrides the cap,
+for example `command: ["-Xmx64m"]` in a compose file.
+
 The JVM image is still there: `-Ptired.image=jvm` makes the image tasks build it, tagged `jvm`.
 
 ```bash

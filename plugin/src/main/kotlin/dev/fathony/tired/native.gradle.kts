@@ -34,6 +34,11 @@ configure<GraalVMExtension> {
          * As on the JVM, for libraries that load native code.
          */
         buildArgs.add("--enable-native-access=ALL-UNNAMED")
+        /**
+         * The default of 80% leaves a small container no room for the executable itself, and it gets killed
+         * once the heap fills. `-Xmx` or `-XX:MaximumHeapSizePercent` on the command line overrides this.
+         */
+        buildArgs.add("-R:MaximumHeapSizePercent=35")
     }
 }
 

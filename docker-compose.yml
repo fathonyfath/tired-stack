@@ -3,4 +3,5 @@ services:
     image: ghcr.io/fathonyfath/tired-stack-sample:latest
     ports:
       - "3000:3000"
+    mem_limit: 64m
     restart: unless-stopped
