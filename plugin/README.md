@@ -41,20 +41,6 @@ application {
 }
 ```
 
-## Smoke test
-
-`./gradlew smokeTest` starts the built app and requests pages from it, along with the stylesheets, scripts and icons
-they link to. It fails when the app doesn't start or anything answers with an error:
-
-```kotlin
-smokeTest {
-    port = 3000                         // default
-    paths = listOf("/", "/contacts")    // default: "/"
-}
-```
-
-It isn't part of `check`, because it needs the port free. Run it in CI.
-
 ## Web assets
 
 ```kotlin
@@ -82,21 +68,6 @@ npm packages can be imported from both entries, e.g. `@import "some-package";` i
 
 Under `./gradlew run`, the stylesheet and script are rebuilt whenever a source changes and served uncached, so a
 browser refresh shows the change without a restart.
-
-## Icons
-
-Every [Lucide](https://lucide.dev/icons) icon is an `Icons` constant, named in PascalCase: `search` is `Icons.Search`
-and `shopping-cart` is `Icons.ShoppingCart`. There's nothing to declare. The sprite is exposed as
-`AssetManifest.icons_svg`. With KTML, templates can use the generated `<icon>` tag:
-
-```html
-<icon name="Icons.Search" class="size-4"/>
-<icon name="${view.icon}"/>
-```
-
-Under `./gradlew run`, the sprite holds every icon, so a new one shows up on refresh. Other builds only keep the icons
-that `src/main/kotlin` and `src/main/ktml` mention as `Icons.Name`. An icon reached any other way, such as a star
-import or `Icons.valueOf`, works under `run` but is missing from the built sprite.
 
 ## PostCSS
 
@@ -128,6 +99,21 @@ webAssets {
     mirror("src/main/resources/templates")
 }
 ```
+
+## Icons
+
+Every [Lucide](https://lucide.dev/icons) icon is an `Icons` constant, named in PascalCase: `search` is `Icons.Search`
+and `shopping-cart` is `Icons.ShoppingCart`. There's nothing to declare. The sprite is exposed as
+`AssetManifest.icons_svg`. With KTML, templates can use the generated `<icon>` tag:
+
+```html
+<icon name="Icons.Search" class="size-4"/>
+<icon name="${view.icon}"/>
+```
+
+Under `./gradlew run`, the sprite holds every icon, so a new one shows up on refresh. Other builds only keep the icons
+that `src/main/kotlin` and `src/main/ktml` mention as `Icons.Name`. An icon reached any other way, such as a star
+import or `Icons.valueOf`, works under `run` but is missing from the built sprite.
 
 ## Native image
 
@@ -175,14 +161,19 @@ works when it ships its own configuration or is in
 needs in a [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
 `src/main/resources/META-INF/native-image/<group>/<name>/`; `nativeSmokeTest` shows when something is missing.
 
-## Toolchain
+## Smoke test
 
-The build tools and their lockfile ship in `src/main/resources/dev/fathony/tired/toolchain`. To update them, edit
-its `package.json` and refresh the lockfile:
+`./gradlew smokeTest` starts the built app and requests pages from it, along with the stylesheets, scripts and icons
+they link to. It fails when the app doesn't start or anything answers with an error:
 
-```bash
-./gradlew -p plugin npmInstall
+```kotlin
+smokeTest {
+    port = 3000                         // default
+    paths = listOf("/", "/contacts")    // default: "/"
+}
 ```
+
+It isn't part of `check`, because it needs the port free. Run it in CI.
 
 ## Development
 
@@ -203,3 +194,12 @@ gh workflow run bump.yml -f bump=patch --ref release/1.x      # patch an older m
 It takes the latest `v*` tag on the branch it runs on, runs the checks, publishes the plugin and `tired-library` at
 the next version, then creates the tag and a GitHub Release. Run it on `main` for new releases, or on a
 `release/<major>.x` branch to patch an older major. A version can only be published once.
+
+### Build tools
+
+The build tools and their lockfile ship in `src/main/resources/dev/fathony/tired/toolchain`. To update them, edit
+its `package.json` and refresh the lockfile:
+
+```bash
+./gradlew -p plugin npmInstall
+```
