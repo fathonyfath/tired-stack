@@ -4,6 +4,7 @@ kotlin = "2.4.20"
 ktor = "3.6.0"
 node-gradle = "7.1.0"
 ktlint-gradle = "14.2.0"
+graalvm-native-gradle = "1.1.14"
 ktml = "0.2.3"
 nodejs = "24.21.0"
 logback = "1.6.5"
@@ -31,6 +32,7 @@ kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.ser
 ktor-gradle-plugin = { module = "io.ktor.plugin:io.ktor.plugin.gradle.plugin", version.ref = "ktor" }
 node-gradle-plugin = { module = "com.github.node-gradle.node:com.github.node-gradle.node.gradle.plugin", version.ref = "node-gradle" }
 ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint-gradle" }
+graalvm-native-gradle-plugin = { module = "org.graalvm.buildtools.native:org.graalvm.buildtools.native.gradle.plugin", version.ref = "graalvm-native-gradle" }
 ktml-gradle-plugin = { module = "dev.ktml.gradle:dev.ktml.gradle.gradle.plugin", version.ref = "ktml" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

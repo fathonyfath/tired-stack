@@ -32,6 +32,7 @@ dependencies {
     implementation(libs.node.gradle.plugin)
     implementation(libs.ktlint.gradle.plugin)
     implementation(libs.ktml.gradle.plugin)
+    implementation(libs.graalvm.native.gradle.plugin)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)

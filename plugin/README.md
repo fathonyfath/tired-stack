@@ -7,6 +7,7 @@ tooling such as Tailwind is added by the app through PostCSS.
 plugins {
     id("dev.fathony.tired") version "0.1.0"        // Ktor app + KTML + web assets
     id("dev.fathony.tired.icons") version "0.1.0"  // optional: Lucide icons
+    id("dev.fathony.tired.native") version "0.1.0" // optional: GraalVM native image
 }
 ```
 
@@ -30,6 +31,7 @@ pluginManagement {
 | `dev.fathony.tired.ktml` | yes | KTML templates from `src/main/ktml`, hot reloaded under `run`; adds tired-library (`installTired()`, `KtmlView`, `respondView`, `page`, `sendView`) |
 | `dev.fathony.tired.web-assets` | yes | Bundles the script and stylesheet into hashed files with esbuild, exposed as `AssetManifest` |
 | `dev.fathony.tired.icons` | no | Lucide icons: one SVG sprite, the `Icons` enum and, with KTML, the `<icon>` tag |
+| `dev.fathony.tired.native` | no | `nativeCompile`: the app as a GraalVM native image |
 
 The app sets its main class and its own feature libraries, such as `ktor-server-resources` or `ktor-server-sse`:
 
@@ -112,6 +114,20 @@ webAssets {
     mirror("src/main/resources/templates")
 }
 ```
+
+## Native image
+
+`./gradlew nativeCompile` builds the app into one executable at `build/native/nativeCompile/<project name>`. It
+starts in a fraction of a second and needs far less memory than the JVM. Gradle downloads GraalVM, so there's nothing
+to install, but the build needs a C compiler and zlib, and the executable only runs on the kind of machine that built
+it.
+
+Templates, web assets, icons and logging work as they are: tired-library tells the image what the stack needs kept.
+Libraries the app adds are covered when they ship their own configuration or are in
+[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). For anything else that uses
+reflection or reads resources, add a
+[`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
+`src/main/resources/META-INF/native-image/<group>/<name>/`. `./gradlew run` and the tests stay on the JVM.
 
 ## Toolchain
 

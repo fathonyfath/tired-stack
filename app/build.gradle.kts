@@ -1,11 +1,9 @@
 import io.ktor.plugin.features.DockerImageRegistry
-import java.nio.file.Files
-import java.nio.file.Path
 
 plugins {
     id("dev.fathony.tired")
     id("dev.fathony.tired.icons")
-    id("org.graalvm.buildtools.native")
+    id("dev.fathony.tired.native")
 }
 
 application {
@@ -45,48 +43,6 @@ jib {
                 commit?.let { put("org.opencontainers.image.revision", it) }
             }
     }
-}
-
-/**
- * `./gradlew nativeCompile` builds `build/native/nativeCompile/tired-stack-sample` with a GraalVM that Gradle
- * downloads. tired-library tells the image what the stack needs kept.
- */
-val graalvm =
-    javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
-        vendor = JvmVendorSpec.GRAAL_VM
-    }
-
-graalvmNative {
-    binaries {
-        named("main") {
-            imageName = "tired-stack-sample"
-            javaLauncher = graalvm
-            /**
-             * sqlite-jdbc loads its native library.
-             */
-            buildArgs.add("--enable-native-access=ALL-UNNAMED")
-        }
-    }
-}
-
-/**
- * Gradle unpacks a downloaded JDK without its symlinks, which leaves `bin/native-image` an empty file.
- */
-val repairNativeImageLauncher =
-    tasks.register("repairNativeImageLauncher") {
-        val home = graalvm.map { it.metadata.installationPath.asFile }
-        doLast {
-            val launcher = home.get().resolve("bin/native-image").toPath()
-            if (!Files.isSymbolicLink(launcher) && Files.size(launcher) == 0L) {
-                Files.delete(launcher)
-                Files.createSymbolicLink(launcher, Path.of("../lib/svm/bin/native-image"))
-            }
-        }
-    }
-
-tasks.named("nativeCompile") {
-    dependsOn(repairNativeImageLauncher)
 }
 
 webAssets {

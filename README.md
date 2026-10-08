@@ -30,7 +30,8 @@ Then apply it in the app's `build.gradle.kts`:
 ```kotlin
 plugins {
     id("dev.fathony.tired") version "0.1.0"
-    id("dev.fathony.tired.icons") version "0.1.0"  // optional
+    id("dev.fathony.tired.icons") version "0.1.0"   // optional
+    id("dev.fathony.tired.native") version "0.1.0"  // optional
 }
 
 application {
@@ -131,7 +132,7 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 | `./gradlew format` | Format Kotlin, JavaScript and CSS |
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
-| `./gradlew nativeCompile` | Build a GraalVM native binary at `app/build/native/nativeCompile/tired-stack-sample` |
+| `./gradlew nativeCompile` | Build a GraalVM native executable at `app/build/native/nativeCompile/app` |
 | `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
 | `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
@@ -144,16 +145,13 @@ Every push to `main` is checked and the sample is published to GHCR, tagged `lat
 docker compose up -d
 ```
 
-The sample also builds as a GraalVM native image, which starts in a fraction of a second and needs far less memory
-than the JVM. Gradle downloads GraalVM itself; [`app/Dockerfile`](app/Dockerfile) wraps the binary in an image:
+The sample also builds as a GraalVM native image through the `dev.fathony.tired.native` plugin, described in the
+[plugin README](plugin/README.md#native-image). [`app/Dockerfile`](app/Dockerfile) wraps the executable in an image:
 
 ```bash
 ./gradlew nativeCompile
 docker build -t tired-stack-sample:native app
 ```
-
-tired-library carries what the image has to be told about the stack, such as the generated KTML registry and the
-bundled assets, in its [`reachability-metadata.json`](library/src/main/resources/META-INF/native-image/dev.fathony.tired/tired-library/reachability-metadata.json).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).
