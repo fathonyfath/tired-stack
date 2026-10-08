@@ -140,71 +140,83 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 
 ## Deployment
 
-Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`, with its JVM
-build as `jvm` and `jvm-sha-<commit>` ([`publish.yml`](.github/workflows/publish.yml)). To run it:
+Every push to `main` is checked and the sample is published to GHCR ([`publish.yml`](.github/workflows/publish.yml)):
+the native image as `latest` and `sha-<commit>`, the JVM image as `jvm` and `jvm-sha-<commit>`. To run it:
 
 ```bash
 docker compose up -d
 ```
 
-The sample ships as a GraalVM native image, through the `dev.fathony.tired.native` plugin: the image holds one
-executable on a distroless base. The JVM image is published next to it, tagged `jvm`; see the
-[plugin README](plugin/README.md#native-image).
+### Memory
 
-### The JVM image in little memory
+Both images size their heap from the container's memory limit, so always set `mem_limit`.
 
-The JVM image's defaults (ZGC, a heap of 75% of the container) suit a roomy host. On a small one, cap each part of
-the JVM's memory, since the heap is only one of them. With the settings below, the sample served 1,000 requests a
-second, a fifth of them writes, for ten minutes on one CPU in 256 MB, peaking at 176 MiB; at 128 MB it was killed.
+| Image | `mem_limit` | Peak | Settings |
+|---|---|---|---|
+| Native (`latest`) | `64m` | 51 MiB | Defaults |
+| JVM (`jvm`) | `256m` | 199 MiB | Defaults |
+| JVM (`jvm`) | `256m` | 176 MiB | Tuned, below |
+
+Peaks are from one CPU at 1,000 requests a second, 20% of them writes.
+
+#### Native image
+
+```yaml
+services:
+  app:
+    image: ghcr.io/fathonyfath/tired-stack-sample:latest
+    mem_limit: 64m
+    cpus: 1
+```
+
+The heap defaults to 35% of `mem_limit`; the executable needs the rest. To change it, pass an argument:
+
+```yaml
+    command: ["-Xmx24m"]
+```
+
+| Argument | Heap |
+|---|---|
+| none | 35% of `mem_limit` |
+| `-Xmx<size>` | A fixed maximum, e.g. `-Xmx24m` |
+| `-XX:MaximumHeapSizePercent=<n>` | Another share of `mem_limit` |
+
+#### JVM image
+
+The image's default, which holds from `256m` up:
+
+```
+JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED -XX:MaxRAMPercentage=50.0 -XX:+UseContainerSupport
+```
+
+To use less memory, replace it and cap each part of the JVM, since the heap is only one of them:
 
 ```yaml
 services:
   app:
     image: ghcr.io/fathonyfath/tired-stack-sample:jvm
-    ports:
-      - "3000:3000"
     mem_limit: 256m
     cpus: 1
-    restart: unless-stopped
     environment:
       MALLOC_ARENA_MAX: "2"
       JAVA_TOOL_OPTIONS: >-
         --enable-native-access=ALL-UNNAMED
-        -XX:+UseSerialGC
-        -XX:+UseContainerSupport
-        -Xmx96m
-        -XX:TieredStopAtLevel=1
-        -XX:ReservedCodeCacheSize=24m
-        -XX:MaxMetaspaceSize=64m
-        -XX:MaxDirectMemorySize=16m
-        -Dio.netty.allocator.numDirectArenas=1
-        -Dio.netty.allocator.numHeapArenas=1
-        -Xss256k
-        -Dkotlinx.coroutines.io.parallelism=8
+        -XX:+UseSerialGC -Xmx96m
+        -XX:TieredStopAtLevel=1 -XX:ReservedCodeCacheSize=24m -XX:MaxMetaspaceSize=64m
+        -XX:MaxDirectMemorySize=16m -Dio.netty.allocator.numDirectArenas=1 -Dio.netty.allocator.numHeapArenas=1
+        -Xss256k -Dkotlinx.coroutines.io.parallelism=8
         -XX:TrimNativeHeapInterval=5000
         -XX:+ExitOnOutOfMemoryError
 ```
 
-Setting `JAVA_TOOL_OPTIONS` replaces the image's own, so it repeats the flags worth keeping.
-
-| Setting | What it limits |
+| Settings | What they cap |
 |---|---|
-| `MALLOC_ARENA_MAX=2` | The memory pools glibc keeps per thread for native allocations |
-| `--enable-native-access=ALL-UNNAMED` | Nothing: Netty and sqlite-jdbc load native code, which JDK 25 warns about without it |
-| `-XX:+UseSerialGC` | The collector's own memory; it is the smallest, and enough for one CPU |
-| `-XX:+UseContainerSupport` | Nothing: the JVM reads the container's limits, which is already the default |
-| `-Xmx96m` | The heap |
-| `-XX:TieredStopAtLevel=1` | The compiler: only the quick one runs, for less compiled code and compiler memory, and lower peak speed |
-| `-XX:ReservedCodeCacheSize=24m` | Compiled code |
-| `-XX:MaxMetaspaceSize=64m` | Class metadata |
-| `-XX:MaxDirectMemorySize=16m` | Buffers outside the heap, which Netty uses for I/O |
-| `-Dio.netty.allocator.num{Direct,Heap}Arenas=1` | Netty's buffer pools, otherwise two per core |
-| `-Xss256k` | Each thread's stack |
-| `-Dkotlinx.coroutines.io.parallelism=8` | The threads of `Dispatchers.IO`, otherwise up to 64 |
-| `-XX:TrimNativeHeapInterval=5000` | Freed native memory that glibc holds on to: it is handed back every five seconds |
-| `-XX:+ExitOnOutOfMemoryError` | Nothing: the app exits when it runs out, so the container restarts it |
-
-The heap, metaspace, code cache and direct memory add up to 200 MB; threads and the JVM itself take the rest.
+| `-XX:+UseSerialGC`, `-Xmx96m` | The heap, with the smallest collector |
+| `-XX:TieredStopAtLevel=1`, `-XX:ReservedCodeCacheSize`, `-XX:MaxMetaspaceSize` | Compiled code and class metadata |
+| `-XX:MaxDirectMemorySize`, `-Dio.netty.allocator.num*Arenas` | Netty's buffers outside the heap |
+| `-Xss256k`, `-Dkotlinx.coroutines.io.parallelism` | Thread stacks, and how many threads `Dispatchers.IO` starts |
+| `MALLOC_ARENA_MAX`, `-XX:TrimNativeHeapInterval` | Native memory that glibc holds on to |
+| `-XX:+ExitOnOutOfMemoryError` | Nothing: the app exits when memory runs out, so the container restarts it |
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).
