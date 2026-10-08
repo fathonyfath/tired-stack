@@ -131,6 +131,7 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 | `./gradlew format` | Format Kotlin, JavaScript and CSS |
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
+| `./gradlew nativeCompile` | Build a GraalVM native binary at `app/build/native/nativeCompile/tired-stack-sample` |
 | `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
 | `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
@@ -142,6 +143,17 @@ Every push to `main` is checked and the sample is published to GHCR, tagged `lat
 ```bash
 docker compose up -d
 ```
+
+The sample also builds as a GraalVM native image, which starts in a fraction of a second and needs far less memory
+than the JVM. Gradle downloads GraalVM itself; [`app/Dockerfile`](app/Dockerfile) wraps the binary in an image:
+
+```bash
+./gradlew nativeCompile
+docker build -t tired-stack-sample:native app
+```
+
+What the image has to be told about, such as the generated KTML registry and the bundled assets, is in
+[`reachability-metadata.json`](app/src/main/resources/META-INF/native-image/dev.fathony.tired/tired-stack-sample/reachability-metadata.json).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).
