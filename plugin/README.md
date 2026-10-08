@@ -1,7 +1,7 @@
 # tired-gradle-plugin
 
-Gradle plugin for the Tired Stack: a Ktor app with KTML templates and bundled web assets. Icons are opt-in, and CSS
-tooling such as Tailwind is added by the app through PostCSS.
+Gradle plugin for the Tired Stack: a Ktor app with KTML templates and bundled web assets. Icons and native images are
+opt-in, and you add CSS tooling such as Tailwind yourself, through PostCSS.
 
 ```kotlin
 plugins {
@@ -11,8 +11,8 @@ plugins {
 }
 ```
 
-Releases are published to [maven.fathony.dev](https://maven.fathony.dev). The plugin comes from there, and it
-declares the repository itself for `tired-library`, which it adds to the app:
+The plugin is published to [maven.fathony.dev](https://maven.fathony.dev). Add that repository once, and the plugin
+fetches its runtime library, `tired-library`, from it for you:
 
 ```kotlin
 // settings.gradle.kts
@@ -24,16 +24,16 @@ pluginManagement {
 }
 ```
 
-| Plugin | Applied by `dev.fathony.tired` | What it sets up |
-|---|---|---|
-| `dev.fathony.tired.kotlin` | yes | Kotlin JVM 25, JUnit with kotlin-test, ktlint, `format` |
-| `dev.fathony.tired.ktor-app` | yes | Ktor with Docker defaults and serialization; adds `ktor-server-core`, `ktor-server-netty` and `logback-classic`; `smokeTest` |
-| `dev.fathony.tired.ktml` | yes | KTML templates from `src/main/ktml`, hot reloaded under `run`; adds tired-library (`installTired()`, `KtmlView`, `respondView`, `page`, `sendView`) |
-| `dev.fathony.tired.web-assets` | yes | Bundles the script and stylesheet into hashed files with esbuild, exposed as `AssetManifest` |
-| `dev.fathony.tired.icons` | no | Lucide icons: one SVG sprite, the `Icons` enum and, with KTML, the `<icon>` tag |
-| `dev.fathony.tired.native` | no | Ships the app as a GraalVM native image: `nativeCompile`, `nativeSmokeTest`, and the image tasks package the executable |
+| Plugin | Applied by `dev.fathony.tired` | What it sets up | Tasks it adds |
+|---|---|---|---|
+| `dev.fathony.tired.kotlin` | yes | Kotlin on JDK 25, JUnit with kotlin-test, and ktlint | `format` |
+| `dev.fathony.tired.ktor-app` | yes | Ktor with serialization, Netty, logback and Docker defaults | `smokeTest`, `setupGitHooks` |
+| `dev.fathony.tired.ktml` | yes | KTML templates from `src/main/ktml`, reloaded while `run` is going, and tired-library's helpers: `installTired()`, `KtmlView`, `respondView`, `page`, `sendView` | |
+| `dev.fathony.tired.web-assets` | yes | Your script and stylesheet, bundled into hashed files with esbuild and exposed as `AssetManifest` | `npmLatest` |
+| `dev.fathony.tired.icons` | no | Lucide icons: one SVG sprite, the `Icons` enum and, with KTML, the `<icon>` tag | |
+| `dev.fathony.tired.native` | no | The app shipped as a GraalVM native image | `nativeCompile`, `nativeSmokeTest` |
 
-The app sets its main class and its own feature libraries, such as `ktor-server-resources` or `ktor-server-sse`:
+You set the main class and add the Ktor features you use, such as `ktor-server-resources` or `ktor-server-sse`:
 
 ```kotlin
 application {
@@ -53,8 +53,8 @@ webAssets {
 }
 ```
 
-A missing entry is skipped. The built files are exposed as `AssetManifest.stylesheet_css` and
-`AssetManifest.index_js`, and `installTired()` serves them:
+If you have no stylesheet or no script, that step is skipped. The built files are available as
+`AssetManifest.stylesheet_css` and `AssetManifest.index_js`, and `installTired()` serves them:
 
 ```kotlin
 embeddedServer(Netty, port = 3000) {
@@ -63,16 +63,16 @@ embeddedServer(Netty, port = 3000) {
 }
 ```
 
-npm packages can be imported from both entries, e.g. `@import "some-package";` in CSS or `import "htmx.org";` in JS.
+You can import npm packages from both files, e.g. `@import "some-package";` in CSS or `import "htmx.org";` in JS.
 `./gradlew npmLatest -Ppackage=<name>` prints a package's latest version.
 
-Under `./gradlew run`, the stylesheet and script are rebuilt whenever a source changes and served uncached, so a
-browser refresh shows the change without a restart.
+While `./gradlew run` is going, the stylesheet and script are rebuilt whenever you save and served uncached, so a
+browser refresh shows the change.
 
 ## PostCSS
 
-The stylesheet can go through PostCSS plugins before esbuild bundles it. They're npm packages the app adds, so the app
-owns their versions. Tailwind v4:
+Your stylesheet can go through PostCSS plugins before esbuild bundles it. They're npm packages you add, so you pick
+their versions. For Tailwind v4:
 
 ```kotlin
 webAssets {
@@ -91,8 +91,8 @@ webAssets {
 @source "./";
 ```
 
-With PostCSS, `src/main/kotlin` and `src/main/ktml` are reachable from the stylesheet at their usual relative paths.
-For an `@source` pointing anywhere else, add that folder:
+With PostCSS, the stylesheet can reach `src/main/kotlin` and `src/main/ktml` at their usual relative paths. To point
+an `@source` anywhere else, add that folder:
 
 ```kotlin
 webAssets {
@@ -111,9 +111,9 @@ and `shopping-cart` is `Icons.ShoppingCart`. There's nothing to declare. The spr
 <icon name="${view.icon}"/>
 ```
 
-Under `./gradlew run`, the sprite holds every icon, so a new one shows up on refresh. Other builds only keep the icons
-that `src/main/kotlin` and `src/main/ktml` mention as `Icons.Name`. An icon reached any other way, such as a star
-import or `Icons.valueOf`, works under `run` but is missing from the built sprite.
+While `./gradlew run` is going, the sprite holds every icon, so a new one shows up on refresh. Other builds only keep
+the icons that `src/main/kotlin` and `src/main/ktml` mention as `Icons.Name`. An icon you reach any other way, such as
+a star import or `Icons.valueOf`, works while developing but is missing from the built sprite.
 
 ## Native image
 
@@ -141,13 +141,13 @@ Requirements:
 
 - A C compiler and zlib
 - Linux, to build the image
-- GraalVM is downloaded by Gradle
+
+There's nothing else to install: Gradle downloads GraalVM.
 
 The base image is `gcr.io/distroless/java-base-debian12`; `ktor.docker.customBaseImage` changes it.
 
-The heap is capped at 35% of the container's memory, because the executable needs room next to it; GraalVM's own
-default of 80% gets a small container killed under load. `-Xmx` as an argument to the executable overrides the cap,
-for example `command: ["-Xmx64m"]` in a compose file.
+The heap is capped at 35% of the container's memory, because the executable needs room next to it. The root README
+has the [limits and how to change them](../README.md#memory).
 
 The JVM image is still there: `-Ptired.image=jvm` makes the image tasks build it, tagged `jvm`.
 
@@ -155,11 +155,15 @@ The JVM image is still there: `-Ptired.image=jvm` makes the image tasks build it
 ./gradlew publishImage -Ptired.image=jvm
 ```
 
-The stack's own templates, assets, icons and logging are already declared by tired-library. A library the app adds
-works when it ships its own configuration or is in
-[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). Otherwise, declare what it
-needs in a [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
-`src/main/resources/META-INF/native-image/<group>/<name>/`; `nativeSmokeTest` shows when something is missing.
+You don't declare anything for the stack itself: tired-library covers its templates, assets, icons and logging. A
+library you add works as it is when it ships its own configuration or is in
+[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). When one doesn't:
+
+1. Run `./gradlew nativeSmokeTest` to see what fails.
+2. Declare what the library needs in a
+   [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
+   `src/main/resources/META-INF/native-image/<group>/<name>/`.
+3. Run the smoke test again.
 
 ## Smoke test
 
@@ -197,8 +201,8 @@ the next version, then creates the tag and a GitHub Release. Run it on `main` fo
 
 ### Build tools
 
-The build tools and their lockfile ship in `src/main/resources/dev/fathony/tired/toolchain`. To update them, edit
-its `package.json` and refresh the lockfile:
+esbuild, PostCSS, Prettier and the Lucide icons ship with their lockfile in
+`src/main/resources/dev/fathony/tired/toolchain`. To update them, edit its `package.json` and refresh the lockfile:
 
 ```bash
 ./gradlew -p plugin npmInstall
