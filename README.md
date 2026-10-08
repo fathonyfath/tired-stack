@@ -11,10 +11,27 @@ JavaScript to be dangerous.
 - **[Lucide](https://lucide.dev)** icons are exposed as a type-safe `Icons` enum, and the SVG sprite only keeps the ones you use.
 - **Gradle** runs everything, including Node.js: there is no `npm install` and no `package.json` to maintain.
 
+It suits sites that are mostly pages and forms: the server renders the HTML, and HTMX updates the parts that change.
+If you want an app that keeps its state in the browser, this isn't that. You can see the sample running at
+[tired.fathony.dev](https://tired.fathony.dev).
+
+## Try the Sample
+
+You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
+
+```bash
+git clone https://github.com/fathonyfath/tired-stack.git
+cd tired-stack
+./gradlew run
+```
+
+Open http://localhost:3000. While `run` is going, templates, styles (including new Tailwind classes) and scripts
+are rebuilt when you save, so refresh the browser to see them. Kotlin changes need a restart.
+
 ## Installation
 
-Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository to
-`pluginManagement` in `settings.gradle.kts`; the plugin declares it for `tired-library`, which it adds to the app:
+The plugin is published to [maven.fathony.dev](https://maven.fathony.dev). Add that repository in
+`settings.gradle.kts`:
 
 ```kotlin
 pluginManagement {
@@ -25,7 +42,7 @@ pluginManagement {
 }
 ```
 
-Then apply it in the app's `build.gradle.kts`:
+Then apply the plugin in your `build.gradle.kts`:
 
 ```kotlin
 plugins {
@@ -39,21 +56,8 @@ application {
 }
 ```
 
-Templates go in `src/main/ktml`, and the script and stylesheet in `src/main/web`. Call `installTired()` in your Ktor
-module. The [plugin README](plugin/README.md) covers the options.
-
-## Try the Sample
-
-You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
-
-```bash
-git clone https://github.com/fathonyfath/tired-stack.git
-cd tired-stack
-./gradlew run
-```
-
-Open http://localhost:3000. While `run` is going, templates, styles (including new Tailwind classes) and scripts
-are rebuilt on save: refresh the browser to see them. Changes to Kotlin code need a restart.
+Put your templates in `src/main/ktml` and your script and stylesheet in `src/main/web`, then call `installTired()`
+in your Ktor module. The [plugin README](plugin/README.md) covers the options.
 
 ## Project Layout
 
@@ -70,7 +74,7 @@ plugin/                     The tired Gradle plugin, built from source as part o
 gradle/libs.versions.toml   Versions
 ```
 
-All the build logic lives in [`plugin/`](plugin/README.md), so the app's build file only says what the app uses.
+All the build logic lives in [`plugin/`](plugin/README.md), so the app's build file only lists what the app uses.
 
 ## How a Page Works
 
@@ -88,7 +92,7 @@ data class HomePage(val title: String, val icon: Icons) : KtmlView {
 fun Route.home() = page<Home> { HomePage(title = "Hello world!", icon = Icons.Search) }
 ```
 
-The template declares the view it expects, so everything it reads is checked by the compiler:
+The template declares the view it expects, so the compiler checks everything it reads:
 
 ```html
 <!-- ktml/pages/home.ktml, shortened -->
@@ -101,8 +105,8 @@ import dev.fathony.tired.features.HomePage
 </html>
 ```
 
-`<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml); any
-template can be a tag.
+`<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml). You can
+use any template as a tag.
 
 [`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt) calls `installTired()` once to set up KTML and serve the
 web assets, and installs `Resources` and `SSE` for the helpers that need them. These helpers connect views to Ktor:
@@ -114,14 +118,16 @@ web assets, and installs `Resources` and `SSE` for the helpers that need them. T
 | `sendView(event, view)` | Send a rendered fragment as a Server-Sent Event; needs `SSE` |
 
 The [HTMX demo](app/src/main/kotlin/dev/fathony/tired/features/HtmxDemo.kt) and
-[SSE demo](app/src/main/kotlin/dev/fathony/tired/features/SseDemo.kt) show the fragment side.
+[SSE demo](app/src/main/kotlin/dev/fathony/tired/features/SseDemo.kt) show how to return just a fragment.
 
 ## Styles, Scripts and Icons
 
-`app/src/main/web/index.js` and `stylesheet.css` are bundled by esbuild into hashed files, referenced from templates
-through the generated `AssetManifest`. npm packages and Tailwind (as a PostCSS plugin) are declared in
-[`app/build.gradle.kts`](app/build.gradle.kts); the [plugin README](plugin/README.md) has the full set of options.
-Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps the ones you use.
+- **Styles and scripts**: esbuild bundles `app/src/main/web/stylesheet.css` and `index.js` into hashed files.
+  Templates refer to them through the generated `AssetManifest`.
+- **npm packages and Tailwind**: you declare them in [`app/build.gradle.kts`](app/build.gradle.kts).
+- **Icons**: every Lucide icon is `Icons.Name`.
+
+The [plugin README](plugin/README.md) has every option.
 
 ## Commands
 
@@ -140,71 +146,83 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 
 ## Deployment
 
-Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`, with its JVM
-build as `jvm` and `jvm-sha-<commit>` ([`publish.yml`](.github/workflows/publish.yml)). To run it:
+CI checks every push to `main` and publishes the sample to GHCR ([`publish.yml`](.github/workflows/publish.yml)):
+the native image as `latest` and `sha-<commit>`, the JVM image as `jvm` and `jvm-sha-<commit>`. To run it:
 
 ```bash
 docker compose up -d
 ```
 
-The sample ships as a GraalVM native image, through the `dev.fathony.tired.native` plugin: the image holds one
-executable on a distroless base. The JVM image is published next to it, tagged `jvm`; see the
-[plugin README](plugin/README.md#native-image).
+### Memory
 
-### The JVM image in little memory
+Both images size their heap from the container's memory limit, so always set `mem_limit`.
 
-The JVM image's defaults (ZGC, a heap of 75% of the container) suit a roomy host. On a small one, cap each part of
-the JVM's memory, since the heap is only one of them. With the settings below, the sample served 1,000 requests a
-second, a fifth of them writes, for ten minutes on one CPU in 256 MB, peaking at 176 MiB; at 128 MB it was killed.
+| Image | `mem_limit` | Peak | Settings |
+|---|---|---|---|
+| Native (`latest`) | `64m` | 51 MiB | Defaults |
+| JVM (`jvm`) | `256m` | 199 MiB | Defaults |
+| JVM (`jvm`) | `256m` | 176 MiB | Tuned (see below) |
+
+Peaks are from one CPU at 1,000 requests a second, 20% of them writes.
+
+#### Native image
+
+```yaml
+services:
+  app:
+    image: ghcr.io/fathonyfath/tired-stack-sample:latest
+    mem_limit: 64m
+    cpus: 1
+```
+
+The heap defaults to 35% of `mem_limit`; the executable needs the rest. To change it, pass an argument:
+
+```yaml
+    command: ["-Xmx24m"]
+```
+
+| Argument | Heap |
+|---|---|
+| none | 35% of `mem_limit` |
+| `-Xmx<size>` | A fixed maximum, e.g. `-Xmx24m` |
+| `-XX:MaximumHeapSizePercent=<n>` | Another share of `mem_limit` |
+
+#### JVM image
+
+The image's default, which holds from `256m` up:
+
+```
+JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED -XX:MaxRAMPercentage=50.0 -XX:+UseContainerSupport
+```
+
+To use less memory, replace it and cap each part of the JVM, since the heap is only one of them:
 
 ```yaml
 services:
   app:
     image: ghcr.io/fathonyfath/tired-stack-sample:jvm
-    ports:
-      - "3000:3000"
     mem_limit: 256m
     cpus: 1
-    restart: unless-stopped
     environment:
       MALLOC_ARENA_MAX: "2"
       JAVA_TOOL_OPTIONS: >-
         --enable-native-access=ALL-UNNAMED
-        -XX:+UseSerialGC
-        -XX:+UseContainerSupport
-        -Xmx96m
-        -XX:TieredStopAtLevel=1
-        -XX:ReservedCodeCacheSize=24m
-        -XX:MaxMetaspaceSize=64m
-        -XX:MaxDirectMemorySize=16m
-        -Dio.netty.allocator.numDirectArenas=1
-        -Dio.netty.allocator.numHeapArenas=1
-        -Xss256k
-        -Dkotlinx.coroutines.io.parallelism=8
+        -XX:+UseSerialGC -Xmx96m
+        -XX:TieredStopAtLevel=1 -XX:ReservedCodeCacheSize=24m -XX:MaxMetaspaceSize=64m
+        -XX:MaxDirectMemorySize=16m -Dio.netty.allocator.numDirectArenas=1 -Dio.netty.allocator.numHeapArenas=1
+        -Xss256k -Dkotlinx.coroutines.io.parallelism=8
         -XX:TrimNativeHeapInterval=5000
         -XX:+ExitOnOutOfMemoryError
 ```
 
-Setting `JAVA_TOOL_OPTIONS` replaces the image's own, so it repeats the flags worth keeping.
-
-| Setting | What it limits |
+| Settings | What they cap |
 |---|---|
-| `MALLOC_ARENA_MAX=2` | The memory pools glibc keeps per thread for native allocations |
-| `--enable-native-access=ALL-UNNAMED` | Nothing: Netty and sqlite-jdbc load native code, which JDK 25 warns about without it |
-| `-XX:+UseSerialGC` | The collector's own memory; it is the smallest, and enough for one CPU |
-| `-XX:+UseContainerSupport` | Nothing: the JVM reads the container's limits, which is already the default |
-| `-Xmx96m` | The heap |
-| `-XX:TieredStopAtLevel=1` | The compiler: only the quick one runs, for less compiled code and compiler memory, and lower peak speed |
-| `-XX:ReservedCodeCacheSize=24m` | Compiled code |
-| `-XX:MaxMetaspaceSize=64m` | Class metadata |
-| `-XX:MaxDirectMemorySize=16m` | Buffers outside the heap, which Netty uses for I/O |
-| `-Dio.netty.allocator.num{Direct,Heap}Arenas=1` | Netty's buffer pools, otherwise two per core |
-| `-Xss256k` | Each thread's stack |
-| `-Dkotlinx.coroutines.io.parallelism=8` | The threads of `Dispatchers.IO`, otherwise up to 64 |
-| `-XX:TrimNativeHeapInterval=5000` | Freed native memory that glibc holds on to: it is handed back every five seconds |
-| `-XX:+ExitOnOutOfMemoryError` | Nothing: the app exits when it runs out, so the container restarts it |
-
-The heap, metaspace, code cache and direct memory add up to 200 MB; threads and the JVM itself take the rest.
+| `-XX:+UseSerialGC`, `-Xmx96m` | The heap, with the smallest collector |
+| `-XX:TieredStopAtLevel=1`, `-XX:ReservedCodeCacheSize`, `-XX:MaxMetaspaceSize` | Compiled code and class metadata |
+| `-XX:MaxDirectMemorySize`, `-Dio.netty.allocator.num*Arenas` | Netty's buffers outside the heap |
+| `-Xss256k`, `-Dkotlinx.coroutines.io.parallelism` | Thread stacks, and how many threads `Dispatchers.IO` starts |
+| `MALLOC_ARENA_MAX`, `-XX:TrimNativeHeapInterval` | Native memory that glibc holds on to |
+| `-XX:+ExitOnOutOfMemoryError` | Nothing: the app exits when memory runs out, so the container restarts it |
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).

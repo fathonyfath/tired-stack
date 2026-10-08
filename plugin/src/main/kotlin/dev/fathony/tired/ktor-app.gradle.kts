@@ -34,9 +34,13 @@ ktor {
         imageTag = "latest"
         portMappings = listOf(DockerPortMapping(3000, 3000))
 
+        /**
+         * The JVM picks the collector for the container it finds itself in. ZGC needs more memory next to the heap
+         * than a small container has, and half the container for the heap leaves room for the rest of the JVM.
+         */
         environmentVariable(
             "JAVA_TOOL_OPTIONS",
-            "--enable-native-access=ALL-UNNAMED -XX:+UseZGC -XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport",
+            "--enable-native-access=ALL-UNNAMED -XX:MaxRAMPercentage=50.0 -XX:+UseContainerSupport",
         )
     }
 }
