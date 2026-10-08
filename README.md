@@ -11,6 +11,19 @@ JavaScript to be dangerous.
 - **[Lucide](https://lucide.dev)** icons are exposed as a type-safe `Icons` enum, and the SVG sprite only keeps the ones you use.
 - **Gradle** runs everything, including Node.js: there is no `npm install` and no `package.json` to maintain.
 
+## Try the Sample
+
+You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
+
+```bash
+git clone https://github.com/fathonyfath/tired-stack.git
+cd tired-stack
+./gradlew run
+```
+
+Open http://localhost:3000. While `run` is going, templates, styles (including new Tailwind classes) and scripts
+are rebuilt on save: refresh the browser to see them. Changes to Kotlin code need a restart.
+
 ## Installation
 
 Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository to
@@ -41,19 +54,6 @@ application {
 
 Templates go in `src/main/ktml`, and the script and stylesheet in `src/main/web`. Call `installTired()` in your Ktor
 module. The [plugin README](plugin/README.md) covers the options.
-
-## Try the Sample
-
-You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
-
-```bash
-git clone https://github.com/fathonyfath/tired-stack.git
-cd tired-stack
-./gradlew run
-```
-
-Open http://localhost:3000. While `run` is going, templates, styles (including new Tailwind classes) and scripts
-are rebuilt on save: refresh the browser to see them. Changes to Kotlin code need a restart.
 
 ## Project Layout
 
