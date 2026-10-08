@@ -131,28 +131,39 @@ webAssets {
 
 ## Native image
 
-With `dev.fathony.tired.native`, the app ships as a GraalVM native image in place of the JVM build. It starts in a
-fraction of a second and needs far less memory.
+With `dev.fathony.tired.native`, the app ships as a GraalVM native image in place of the JVM build.
 
 | Command | What it does |
 |---|---|
 | `./gradlew nativeCompile` | Builds the executable at `build/native/nativeCompile/<project name>` |
 | `./gradlew nativeSmokeTest` | Gives the executable the [same test](#smoke-test) as the JVM build |
-| `./gradlew publishImage`, `buildImage`, `runDocker`, ... | The same tasks and `ktor.docker` settings as before, now packaging the executable |
+| `./gradlew publishImage`, `buildImage`, `runDocker`, ... | Same tasks and `ktor.docker` settings, now packaging the executable |
 
-Gradle downloads GraalVM, so there's nothing to install, but the build needs a C compiler and zlib. The executable
-only runs on the kind of machine that built it, so images have to be built on Linux, for example in CI.
+Pros:
 
-The image is built on `gcr.io/distroless/java-base-debian12`, which has the libraries the executable needs and nothing
-else: no shell and no JRE. `ktor.docker.customBaseImage` changes it.
+- Starts instantly
+- Much less memory
+- Small image, with no JRE or shell
 
-Templates, web assets, icons and logging work as they are: tired-library tells the image what the stack needs kept.
-Libraries the app adds are covered when they ship their own configuration or are in
-[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). For anything else that uses
-reflection or reads resources, add a
-[`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
-`src/main/resources/META-INF/native-image/<group>/<name>/`. What an image is missing only shows when the code that
-needs it runs, which is what `nativeSmokeTest` is for. `./gradlew run` and the tests stay on the JVM.
+Cons:
+
+- Slower builds
+- The executable only runs on the system that built it
+- Reflection and resources have to be declared
+
+Requirements:
+
+- A C compiler and zlib
+- Linux, to build the image
+- GraalVM is downloaded by Gradle
+
+The base image is `gcr.io/distroless/java-base-debian12`; `ktor.docker.customBaseImage` changes it.
+
+The stack's own templates, assets, icons and logging are already declared by tired-library. A library the app adds
+works when it ships its own configuration or is in
+[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). Otherwise, declare what it
+needs in a [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
+`src/main/resources/META-INF/native-image/<group>/<name>/`; `nativeSmokeTest` shows when something is missing.
 
 ## Toolchain
 
