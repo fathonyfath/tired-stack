@@ -18,6 +18,8 @@ import dev.fathony.tired.features.ContactsPage
 
     <input type="search" name="q" value="${view.query}" placeholder="Search by name or email"
            hx-get="/contacts" hx-trigger="input changed delay:300ms, search" hx-target="#contacts"
+           hx-replace-url="true"
+           hx-on::config-request="if (!event.detail.parameters.get('q')) event.detail.parameters.delete('q')"
            class="mt-4 w-full rounded-md border bg-white px-3 py-2">
 
     <ul id="contacts" class="mt-4 divide-y rounded-md border bg-white">
