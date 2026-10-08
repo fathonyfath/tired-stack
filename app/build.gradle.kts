@@ -3,6 +3,7 @@ import io.ktor.plugin.features.DockerImageRegistry
 plugins {
     id("dev.fathony.tired")
     id("dev.fathony.tired.icons")
+    id("dev.fathony.tired.native")
 }
 
 application {
@@ -24,14 +25,15 @@ ktor {
 }
 
 /**
- * In CI, also tags the image with its commit next to Ktor's `latest`. The labels replace the base image's on the
- * GHCR package page, and the source label links the package to this repo.
+ * In CI, also tags the image with its commit next to Ktor's `latest`, or `jvm` for the JVM image. The labels replace
+ * the base image's on the GHCR package page, and the source label links the package to this repo.
  */
 val commit = providers.environmentVariable("GITHUB_SHA").orNull
+val jvmImage = providers.gradleProperty("tired.image").orNull == "jvm"
 
 jib {
     to {
-        tags = setOfNotNull(commit?.let { "sha-${it.take(7)}" })
+        tags = setOfNotNull(commit?.let { (if (jvmImage) "jvm-" else "") + "sha-${it.take(7)}" })
     }
     container {
         labels =
@@ -42,6 +44,13 @@ jib {
                 commit?.let { put("org.opencontainers.image.revision", it) }
             }
     }
+}
+
+/**
+ * One page of every feature, so each template and query is reached in both builds.
+ */
+smokeTest {
+    paths = listOf("/", "/htmx-test", "/htmx", "/contacts", "/contacts?q=an", "/bank", "/tickets", "/sse-demo")
 }
 
 webAssets {

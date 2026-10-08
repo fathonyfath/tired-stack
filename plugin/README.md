@@ -7,6 +7,7 @@ tooling such as Tailwind is added by the app through PostCSS.
 plugins {
     id("dev.fathony.tired") version "0.1.0"        // Ktor app + KTML + web assets
     id("dev.fathony.tired.icons") version "0.1.0"  // optional: Lucide icons
+    id("dev.fathony.tired.native") version "0.1.0" // optional: GraalVM native image
 }
 ```
 
@@ -26,10 +27,11 @@ pluginManagement {
 | Plugin | Applied by `dev.fathony.tired` | What it sets up |
 |---|---|---|
 | `dev.fathony.tired.kotlin` | yes | Kotlin JVM 25, JUnit with kotlin-test, ktlint, `format` |
-| `dev.fathony.tired.ktor-app` | yes | Ktor with Docker defaults and serialization; adds `ktor-server-core`, `ktor-server-netty` and `logback-classic` |
+| `dev.fathony.tired.ktor-app` | yes | Ktor with Docker defaults and serialization; adds `ktor-server-core`, `ktor-server-netty` and `logback-classic`; `smokeTest` |
 | `dev.fathony.tired.ktml` | yes | KTML templates from `src/main/ktml`, hot reloaded under `run`; adds tired-library (`installTired()`, `KtmlView`, `respondView`, `page`, `sendView`) |
 | `dev.fathony.tired.web-assets` | yes | Bundles the script and stylesheet into hashed files with esbuild, exposed as `AssetManifest` |
 | `dev.fathony.tired.icons` | no | Lucide icons: one SVG sprite, the `Icons` enum and, with KTML, the `<icon>` tag |
+| `dev.fathony.tired.native` | no | Ships the app as a GraalVM native image: `nativeCompile`, `nativeSmokeTest`, and the image tasks package the executable |
 
 The app sets its main class and its own feature libraries, such as `ktor-server-resources` or `ktor-server-sse`:
 
@@ -38,6 +40,20 @@ application {
     mainClass = "com.example.MainKt"
 }
 ```
+
+## Smoke test
+
+`./gradlew smokeTest` starts the built app and requests pages from it, along with the stylesheets, scripts and icons
+they link to. It fails when the app doesn't start or anything answers with an error:
+
+```kotlin
+smokeTest {
+    port = 3000                         // default
+    paths = listOf("/", "/contacts")    // default: "/"
+}
+```
+
+It isn't part of `check`, because it needs the port free. Run it in CI.
 
 ## Web assets
 
@@ -112,6 +128,48 @@ webAssets {
     mirror("src/main/resources/templates")
 }
 ```
+
+## Native image
+
+With `dev.fathony.tired.native`, the app ships as a GraalVM native image in place of the JVM build.
+
+| Command | What it does |
+|---|---|
+| `./gradlew nativeCompile` | Builds the executable at `build/native/nativeCompile/<project name>` |
+| `./gradlew nativeSmokeTest` | Gives the executable the [same test](#smoke-test) as the JVM build |
+| `./gradlew publishImage`, `buildImage`, `runDocker`, ... | Same tasks and `ktor.docker` settings, now packaging the executable |
+
+Pros:
+
+- Starts instantly
+- Much less memory
+- Small image, with no JRE or shell
+
+Cons:
+
+- Slower builds
+- The executable only runs on the system that built it
+- Reflection and resources have to be declared
+
+Requirements:
+
+- A C compiler and zlib
+- Linux, to build the image
+- GraalVM is downloaded by Gradle
+
+The base image is `gcr.io/distroless/java-base-debian12`; `ktor.docker.customBaseImage` changes it.
+
+The JVM image is still there: `-Ptired.image=jvm` makes the image tasks build it, tagged `jvm`.
+
+```bash
+./gradlew publishImage -Ptired.image=jvm
+```
+
+The stack's own templates, assets, icons and logging are already declared by tired-library. A library the app adds
+works when it ships its own configuration or is in
+[GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). Otherwise, declare what it
+needs in a [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
+`src/main/resources/META-INF/native-image/<group>/<name>/`; `nativeSmokeTest` shows when something is missing.
 
 ## Toolchain
 

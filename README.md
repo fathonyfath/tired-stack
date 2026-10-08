@@ -30,7 +30,8 @@ Then apply it in the app's `build.gradle.kts`:
 ```kotlin
 plugins {
     id("dev.fathony.tired") version "0.1.0"
-    id("dev.fathony.tired.icons") version "0.1.0"  // optional
+    id("dev.fathony.tired.icons") version "0.1.0"   // optional
+    id("dev.fathony.tired.native") version "0.1.0"  // optional
 }
 
 application {
@@ -131,17 +132,24 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 | `./gradlew format` | Format Kotlin, JavaScript and CSS |
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
-| `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
+| `./gradlew nativeCompile` | Build a GraalVM native executable at `app/build/native/nativeCompile/app` |
+| `./gradlew smokeTest` | Start the built app and request a page of every feature from it |
+| `./gradlew nativeSmokeTest` | The same, against the native executable |
+| `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker and Linux) |
 | `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
 ## Deployment
 
-Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`
-([`publish.yml`](.github/workflows/publish.yml)). To run it:
+Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`, with its JVM
+build as `jvm` and `jvm-sha-<commit>` ([`publish.yml`](.github/workflows/publish.yml)). To run it:
 
 ```bash
 docker compose up -d
 ```
+
+The sample ships as a GraalVM native image, through the `dev.fathony.tired.native` plugin: the image holds one
+executable on a distroless base. The JVM image is published next to it, tagged `jvm`; see the
+[plugin README](plugin/README.md#native-image).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).
