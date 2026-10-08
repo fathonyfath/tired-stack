@@ -11,6 +11,10 @@ JavaScript to be dangerous.
 - **[Lucide](https://lucide.dev)** icons are exposed as a type-safe `Icons` enum, and the SVG sprite only keeps the ones you use.
 - **Gradle** runs everything, including Node.js: there is no `npm install` and no `package.json` to maintain.
 
+It suits sites that are mostly pages and forms: the server renders the HTML, and HTMX updates the parts that change.
+If you want an app that keeps its state in the browser, this isn't that. You can see the sample running at
+[tired.fathony.dev](https://tired.fathony.dev).
+
 ## Try the Sample
 
 You need a JDK (17 or newer) to run Gradle. The build downloads JDK 25 and Node.js itself.
@@ -22,12 +26,12 @@ cd tired-stack
 ```
 
 Open http://localhost:3000. While `run` is going, templates, styles (including new Tailwind classes) and scripts
-are rebuilt on save: refresh the browser to see them. Changes to Kotlin code need a restart.
+are rebuilt when you save, so refresh the browser to see them. Kotlin changes need a restart.
 
 ## Installation
 
-Releases of the plugin are published to [maven.fathony.dev](https://maven.fathony.dev). Add the repository to
-`pluginManagement` in `settings.gradle.kts`; the plugin declares it for `tired-library`, which it adds to the app:
+The plugin is published to [maven.fathony.dev](https://maven.fathony.dev). Add that repository in
+`settings.gradle.kts`:
 
 ```kotlin
 pluginManagement {
@@ -38,7 +42,7 @@ pluginManagement {
 }
 ```
 
-Then apply it in the app's `build.gradle.kts`:
+Then apply the plugin in your `build.gradle.kts`:
 
 ```kotlin
 plugins {
@@ -52,8 +56,8 @@ application {
 }
 ```
 
-Templates go in `src/main/ktml`, and the script and stylesheet in `src/main/web`. Call `installTired()` in your Ktor
-module. The [plugin README](plugin/README.md) covers the options.
+Put your templates in `src/main/ktml` and your script and stylesheet in `src/main/web`, then call `installTired()`
+in your Ktor module. The [plugin README](plugin/README.md) covers the options.
 
 ## Project Layout
 
@@ -70,7 +74,7 @@ plugin/                     The tired Gradle plugin, built from source as part o
 gradle/libs.versions.toml   Versions
 ```
 
-All the build logic lives in [`plugin/`](plugin/README.md), so the app's build file only says what the app uses.
+All the build logic lives in [`plugin/`](plugin/README.md), so the app's build file only lists what the app uses.
 
 ## How a Page Works
 
@@ -88,7 +92,7 @@ data class HomePage(val title: String, val icon: Icons) : KtmlView {
 fun Route.home() = page<Home> { HomePage(title = "Hello world!", icon = Icons.Search) }
 ```
 
-The template declares the view it expects, so everything it reads is checked by the compiler:
+The template declares the view it expects, so the compiler checks everything it reads:
 
 ```html
 <!-- ktml/pages/home.ktml, shortened -->
@@ -101,8 +105,8 @@ import dev.fathony.tired.features.HomePage
 </html>
 ```
 
-`<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml); any
-template can be a tag.
+`<app-layout>` is a custom tag from [`layouts/app-layout.ktml`](app/src/main/ktml/layouts/app-layout.ktml). You can
+use any template as a tag.
 
 [`Main.kt`](app/src/main/kotlin/dev/fathony/tired/Main.kt) calls `installTired()` once to set up KTML and serve the
 web assets, and installs `Resources` and `SSE` for the helpers that need them. These helpers connect views to Ktor:
@@ -114,14 +118,16 @@ web assets, and installs `Resources` and `SSE` for the helpers that need them. T
 | `sendView(event, view)` | Send a rendered fragment as a Server-Sent Event; needs `SSE` |
 
 The [HTMX demo](app/src/main/kotlin/dev/fathony/tired/features/HtmxDemo.kt) and
-[SSE demo](app/src/main/kotlin/dev/fathony/tired/features/SseDemo.kt) show the fragment side.
+[SSE demo](app/src/main/kotlin/dev/fathony/tired/features/SseDemo.kt) show how to return just a fragment.
 
 ## Styles, Scripts and Icons
 
-`app/src/main/web/index.js` and `stylesheet.css` are bundled by esbuild into hashed files, referenced from templates
-through the generated `AssetManifest`. npm packages and Tailwind (as a PostCSS plugin) are declared in
-[`app/build.gradle.kts`](app/build.gradle.kts); the [plugin README](plugin/README.md) has the full set of options.
-Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps the ones you use.
+- **Styles and scripts**: esbuild bundles `app/src/main/web/stylesheet.css` and `index.js` into hashed files.
+  Templates refer to them through the generated `AssetManifest`.
+- **npm packages and Tailwind**: you declare them in [`app/build.gradle.kts`](app/build.gradle.kts).
+- **Icons**: every Lucide icon is `Icons.Name`.
+
+The [plugin README](plugin/README.md) has every option.
 
 ## Commands
 
@@ -140,7 +146,7 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 
 ## Deployment
 
-Every push to `main` is checked and the sample is published to GHCR ([`publish.yml`](.github/workflows/publish.yml)):
+CI checks every push to `main` and publishes the sample to GHCR ([`publish.yml`](.github/workflows/publish.yml)):
 the native image as `latest` and `sha-<commit>`, the JVM image as `jvm` and `jvm-sha-<commit>`. To run it:
 
 ```bash
@@ -155,7 +161,7 @@ Both images size their heap from the container's memory limit, so always set `me
 |---|---|---|---|
 | Native (`latest`) | `64m` | 51 MiB | Defaults |
 | JVM (`jvm`) | `256m` | 199 MiB | Defaults |
-| JVM (`jvm`) | `256m` | 176 MiB | Tuned, below |
+| JVM (`jvm`) | `256m` | 176 MiB | Tuned (see below) |
 
 Peaks are from one CPU at 1,000 requests a second, 20% of them writes.
 
