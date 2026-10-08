@@ -1,5 +1,8 @@
 package dev.fathony.tired
 
+import com.google.cloud.tools.jib.gradle.JibExtension
+import com.google.cloud.tools.jib.gradle.JibTask
+import dev.fathony.tired.nativeimage.NativeImageJibExtension
 import dev.fathony.tired.smoketest.SmokeTest
 import dev.fathony.tired.smoketest.SmokeTestExtension
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
@@ -8,8 +11,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * `nativeCompile` builds the app as a GraalVM native image, with a GraalVM that Gradle downloads, and
- * `nativeSmokeTest` checks that it serves. tired-library tells the image what the stack needs kept.
+ * Ships the app as a GraalVM native image: `nativeCompile` builds it with a GraalVM that Gradle downloads,
+ * `nativeSmokeTest` checks that it serves, and the image tasks, such as `publishImage`, package it in place of the
+ * JVM build. tired-library tells the image what the stack needs kept.
  */
 plugins {
     id("dev.fathony.tired.ktor-app")
@@ -52,6 +56,36 @@ val nativeCompile =
     tasks.named<BuildNativeImageTask>("nativeCompile") {
         dependsOn(repairNativeImageLauncher)
     }
+
+/**
+ * The executable needs glibc and zlib from the base image, in the architecture it was built for.
+ * `ktor.docker.customBaseImage` in the app overrides the image.
+ */
+ktor {
+    docker {
+        customBaseImage.convention("gcr.io/distroless/java-base-debian12")
+    }
+}
+
+configure<JibExtension> {
+    from {
+        platforms {
+            platform {
+                os = "linux"
+                architecture = if (System.getProperty("os.arch") in setOf("aarch64", "arm64")) "arm64" else "amd64"
+            }
+        }
+    }
+    pluginExtensions {
+        pluginExtension {
+            implementation = NativeImageJibExtension::class.java.name
+        }
+    }
+}
+
+tasks.withType<JibTask>().configureEach {
+    dependsOn(nativeCompile)
+}
 
 val smokeTestSettings = the<SmokeTestExtension>()
 

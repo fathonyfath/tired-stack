@@ -135,7 +135,7 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 | `./gradlew nativeCompile` | Build a GraalVM native executable at `app/build/native/nativeCompile/app` |
 | `./gradlew smokeTest` | Start the built app and request a page of every feature from it |
 | `./gradlew nativeSmokeTest` | The same, against the native executable |
-| `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
+| `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker and Linux) |
 | `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
 ## Deployment
@@ -147,13 +147,9 @@ Every push to `main` is checked and the sample is published to GHCR, tagged `lat
 docker compose up -d
 ```
 
-The sample also builds as a GraalVM native image through the `dev.fathony.tired.native` plugin, described in the
-[plugin README](plugin/README.md#native-image). [`app/Dockerfile`](app/Dockerfile) wraps the executable in an image:
-
-```bash
-./gradlew nativeCompile
-docker build -t tired-stack-sample:native app
-```
+The sample ships as a GraalVM native image, through the `dev.fathony.tired.native` plugin: the image holds one
+executable on a distroless base. Without that plugin the same commands build a JVM image; see the
+[plugin README](plugin/README.md#native-image).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).

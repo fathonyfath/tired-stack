@@ -3,6 +3,4 @@ services:
     image: ghcr.io/fathonyfath/tired-stack-sample:latest
     ports:
       - "3000:3000"
-    environment:
-      - JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED -XX:+UseZGC -XX:MaxRAMPercentage=75.0 -XX:+UseContainerSupport
     restart: unless-stopped
