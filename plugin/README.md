@@ -159,6 +159,12 @@ Requirements:
 
 The base image is `gcr.io/distroless/java-base-debian12`; `ktor.docker.customBaseImage` changes it.
 
+The JVM image is still there: `-Ptired.image=jvm` makes the image tasks build it, tagged `jvm`.
+
+```bash
+./gradlew publishImage -Ptired.image=jvm
+```
+
 The stack's own templates, assets, icons and logging are already declared by tired-library. A library the app adds
 works when it ships its own configuration or is in
 [GraalVM's metadata repository](https://github.com/oracle/graalvm-reachability-metadata). Otherwise, declare what it

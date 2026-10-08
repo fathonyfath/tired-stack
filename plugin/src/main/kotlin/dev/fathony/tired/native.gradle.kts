@@ -58,33 +58,59 @@ val nativeCompile =
     }
 
 /**
- * The executable needs glibc and zlib from the base image, in the architecture it was built for.
- * `ktor.docker.customBaseImage` in the app overrides the image.
+ * `-Ptired.image=jvm` leaves the image tasks building the JVM image, under its own tag so it can't replace the
+ * native one.
  */
-ktor {
-    docker {
-        customBaseImage.convention("gcr.io/distroless/java-base-debian12")
-    }
-}
+val image = providers.gradleProperty("tired.image").getOrElse("native")
+require(image in setOf("native", "jvm")) { "tired.image is either native or jvm, but is $image" }
 
-configure<JibExtension> {
-    from {
-        platforms {
-            platform {
-                os = "linux"
-                architecture = if (System.getProperty("os.arch") in setOf("aarch64", "arm64")) "arm64" else "amd64"
+if (image == "jvm") {
+    val jvmTag = "jvm"
+    ktor {
+        docker {
+            imageTag = jvmTag
+        }
+    }
+
+    /**
+     * Ktor names the image without a tag, which Jib takes to mean `latest` as well.
+     */
+    tasks.withType<JibTask>().configureEach {
+        doFirst {
+            val to = project.the<JibExtension>().to
+            if (":" !in to.image.orEmpty().substringAfterLast('/')) to.image = "${to.image}:$jvmTag"
+        }
+    }
+} else {
+    /**
+     * The executable needs glibc and zlib from the base image, in the architecture it was built for.
+     * `ktor.docker.customBaseImage` in the app overrides the image.
+     */
+    ktor {
+        docker {
+            customBaseImage.convention("gcr.io/distroless/java-base-debian12")
+        }
+    }
+
+    configure<JibExtension> {
+        from {
+            platforms {
+                platform {
+                    os = "linux"
+                    architecture = if (System.getProperty("os.arch") in setOf("aarch64", "arm64")) "arm64" else "amd64"
+                }
+            }
+        }
+        pluginExtensions {
+            pluginExtension {
+                implementation = NativeImageJibExtension::class.java.name
             }
         }
     }
-    pluginExtensions {
-        pluginExtension {
-            implementation = NativeImageJibExtension::class.java.name
-        }
-    }
-}
 
-tasks.withType<JibTask>().configureEach {
-    dependsOn(nativeCompile)
+    tasks.withType<JibTask>().configureEach {
+        dependsOn(nativeCompile)
+    }
 }
 
 val smokeTestSettings = the<SmokeTestExtension>()

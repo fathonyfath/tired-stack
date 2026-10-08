@@ -140,15 +140,15 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 
 ## Deployment
 
-Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`
-([`publish.yml`](.github/workflows/publish.yml)). To run it:
+Every push to `main` is checked and the sample is published to GHCR, tagged `latest` and `sha-<commit>`, with its JVM
+build as `jvm` and `jvm-sha-<commit>` ([`publish.yml`](.github/workflows/publish.yml)). To run it:
 
 ```bash
 docker compose up -d
 ```
 
 The sample ships as a GraalVM native image, through the `dev.fathony.tired.native` plugin: the image holds one
-executable on a distroless base. Without that plugin the same commands build a JVM image; see the
+executable on a distroless base. The JVM image is published next to it, tagged `jvm`; see the
 [plugin README](plugin/README.md#native-image).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
