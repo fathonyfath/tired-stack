@@ -129,6 +129,19 @@ reflection or reads resources, add a
 [`reachability-metadata.json`](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) under
 `src/main/resources/META-INF/native-image/<group>/<name>/`. `./gradlew run` and the tests stay on the JVM.
 
+What an image is missing only shows when the code that needs it runs, so a page that renders on the JVM can still fail
+in the image. `./gradlew nativeSmokeTest` starts the executable and requests pages from it, failing on an error
+response or a crash:
+
+```kotlin
+tasks.nativeSmokeTest {
+    port = 3000                         // default
+    paths = listOf("/", "/contacts")    // default: "/"
+}
+```
+
+It isn't part of `check`, because it needs the port free and a native build. Run it in CI.
+
 ## Toolchain
 
 The build tools and their lockfile ship in `src/main/resources/dev/fathony/tired/toolchain`. To update them, edit

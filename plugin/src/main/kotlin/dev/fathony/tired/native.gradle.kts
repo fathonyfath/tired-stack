@@ -1,12 +1,14 @@
 package dev.fathony.tired
 
+import dev.fathony.tired.nativeimage.NativeSmokeTest
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
+import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
 import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * `nativeCompile` builds the app as a GraalVM native image, with a GraalVM that Gradle downloads.
- * tired-library tells the image what the stack needs kept.
+ * `nativeCompile` builds the app as a GraalVM native image, with a GraalVM that Gradle downloads, and
+ * `nativeSmokeTest` checks that it serves. tired-library tells the image what the stack needs kept.
  */
 plugins {
     id("dev.fathony.tired.ktor-app")
@@ -45,6 +47,20 @@ val repairNativeImageLauncher =
         }
     }
 
-tasks.named("nativeCompile") {
-    dependsOn(repairNativeImageLauncher)
+val nativeCompile =
+    tasks.named<BuildNativeImageTask>("nativeCompile") {
+        dependsOn(repairNativeImageLauncher)
+    }
+
+/**
+ * Not part of `check`: it needs the app's port free and a native build, which takes a while.
+ */
+tasks.register<NativeSmokeTest>("nativeSmokeTest") {
+    group = "verification"
+    description = "Starts the native image and requests pages from it."
+    executable.set(nativeCompile.flatMap { it.outputFile })
+    port.convention(3000)
+    paths.convention(listOf("/"))
+    startTimeoutSeconds.convention(30)
+    log.set(layout.buildDirectory.file("reports/nativeSmokeTest/output.log"))
 }

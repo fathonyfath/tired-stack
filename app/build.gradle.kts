@@ -45,6 +45,13 @@ jib {
     }
 }
 
+/**
+ * One page of every feature, so each template, query and asset is reached in the native image.
+ */
+tasks.nativeSmokeTest {
+    paths = listOf("/", "/htmx-test", "/htmx", "/contacts", "/contacts?q=an", "/bank", "/tickets", "/sse-demo")
+}
+
 webAssets {
     npm("htmx.org", "2.0.11")
     npm("htmx-ext-sse", "2.2.4")
