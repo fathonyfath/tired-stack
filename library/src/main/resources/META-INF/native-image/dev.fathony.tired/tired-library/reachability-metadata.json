@@ -1,0 +1,14 @@
+{
+  "reflection": [
+    {
+      "type": "dev.ktml.templates.KtmlRegistry",
+      "fields": [{ "name": "INSTANCE" }]
+    }
+  ],
+  "resources": [
+    { "glob": "static/**" },
+    { "glob": "logback.xml" },
+    { "glob": "ch/qos/logback/classic/logback-classic-version.properties" },
+    { "glob": "ch/qos/logback/core/logback-core-version.properties" }
+  ]
+}

@@ -152,8 +152,8 @@ than the JVM. Gradle downloads GraalVM itself; [`app/Dockerfile`](app/Dockerfile
 docker build -t tired-stack-sample:native app
 ```
 
-What the image has to be told about, such as the generated KTML registry and the bundled assets, is in
-[`reachability-metadata.json`](app/src/main/resources/META-INF/native-image/dev.fathony.tired/tired-stack-sample/reachability-metadata.json).
+tired-library carries what the image has to be told about the stack, such as the generated KTML registry and the
+bundled assets, in its [`reachability-metadata.json`](library/src/main/resources/META-INF/native-image/dev.fathony.tired/tired-library/reachability-metadata.json).
 
 Releases of the plugin and library are cut with the [Bump Version](.github/workflows/bump.yml) workflow; see the
 [plugin README](plugin/README.md#development).

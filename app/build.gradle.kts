@@ -49,7 +49,7 @@ jib {
 
 /**
  * `./gradlew nativeCompile` builds `build/native/nativeCompile/tired-stack-sample` with a GraalVM that Gradle
- * downloads. What the image can't work out by itself is listed in `META-INF/native-image`.
+ * downloads. tired-library tells the image what the stack needs kept.
  */
 val graalvm =
     javaToolchains.launcherFor {
