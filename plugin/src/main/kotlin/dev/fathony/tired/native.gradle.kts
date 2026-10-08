@@ -1,6 +1,7 @@
 package dev.fathony.tired
 
-import dev.fathony.tired.nativeimage.NativeSmokeTest
+import dev.fathony.tired.smoketest.SmokeTest
+import dev.fathony.tired.smoketest.SmokeTestExtension
 import org.graalvm.buildtools.gradle.dsl.GraalVMExtension
 import org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask
 import java.nio.file.Files
@@ -52,15 +53,18 @@ val nativeCompile =
         dependsOn(repairNativeImageLauncher)
     }
 
+val smokeTestSettings = the<SmokeTestExtension>()
+
 /**
- * Not part of `check`: it needs the app's port free and a native build, which takes a while.
+ * What an image is missing only shows when the code that needs it runs, so it gets the same test as the JVM build.
  */
-tasks.register<NativeSmokeTest>("nativeSmokeTest") {
+tasks.register<SmokeTest>("nativeSmokeTest") {
     group = "verification"
     description = "Starts the native image and requests pages from it."
-    executable.set(nativeCompile.flatMap { it.outputFile })
-    port.convention(3000)
-    paths.convention(listOf("/"))
-    startTimeoutSeconds.convention(30)
+    configureFrom(smokeTestSettings)
+
+    val executable = nativeCompile.flatMap { it.outputFile }
+    app.from(executable)
+    command.set(executable.map { listOf(it.asFile.absolutePath) })
     log.set(layout.buildDirectory.file("reports/nativeSmokeTest/output.log"))
 }

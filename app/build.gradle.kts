@@ -46,9 +46,9 @@ jib {
 }
 
 /**
- * One page of every feature, so each template, query and asset is reached in the native image.
+ * One page of every feature, so each template and query is reached in both builds.
  */
-tasks.nativeSmokeTest {
+smokeTest {
     paths = listOf("/", "/htmx-test", "/htmx", "/contacts", "/contacts?q=an", "/bank", "/tickets", "/sse-demo")
 }
 

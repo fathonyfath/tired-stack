@@ -32,6 +32,8 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - name: check
         run: ./gradlew check
+      - name: smokeTest
+        run: ./gradlew smokeTest
 
   native:
     name: Native Image

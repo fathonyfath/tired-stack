@@ -1,6 +1,8 @@
 package dev.fathony.tired
 
 import dev.fathony.tired.internal.TiredVersions
+import dev.fathony.tired.smoketest.SmokeTest
+import dev.fathony.tired.smoketest.SmokeTestExtension
 import io.ktor.plugin.features.DockerPortMapping
 
 plugins {
@@ -44,6 +46,31 @@ ktor {
  */
 tasks.named<JavaExec>("run") {
     systemProperty("tired.dev", "true")
+}
+
+val smokeTestSettings =
+    extensions.create<SmokeTestExtension>("smokeTest").apply {
+        port.convention(3000)
+        paths.convention(listOf("/"))
+        startTimeoutSeconds.convention(30)
+    }
+
+/**
+ * Runs the app as the image does: the built classes and libraries, without what `run` adds for development.
+ * Not part of `check`: it needs the app's port free.
+ */
+tasks.register<SmokeTest>("smokeTest") {
+    group = "verification"
+    description = "Starts the app on the JVM and requests pages from it."
+    configureFrom(smokeTestSettings)
+
+    val java = javaToolchains.launcherFor(java.toolchain).map { it.executablePath.asFile.absolutePath }
+    val classpath = sourceSets.main.map { it.runtimeClasspath }
+    val jvmArgs = provider { application.applicationDefaultJvmArgs.toList() }
+    val mainClass = application.mainClass
+    app.from(classpath)
+    command.set(provider { listOf(java.get()) + jvmArgs.get() + listOf("-cp", classpath.get().asPath, mainClass.get()) })
+    log.set(layout.buildDirectory.file("reports/smokeTest/output.log"))
 }
 
 tasks.register<Exec>("setupGitHooks") {

@@ -27,11 +27,11 @@ pluginManagement {
 | Plugin | Applied by `dev.fathony.tired` | What it sets up |
 |---|---|---|
 | `dev.fathony.tired.kotlin` | yes | Kotlin JVM 25, JUnit with kotlin-test, ktlint, `format` |
-| `dev.fathony.tired.ktor-app` | yes | Ktor with Docker defaults and serialization; adds `ktor-server-core`, `ktor-server-netty` and `logback-classic` |
+| `dev.fathony.tired.ktor-app` | yes | Ktor with Docker defaults and serialization; adds `ktor-server-core`, `ktor-server-netty` and `logback-classic`; `smokeTest` |
 | `dev.fathony.tired.ktml` | yes | KTML templates from `src/main/ktml`, hot reloaded under `run`; adds tired-library (`installTired()`, `KtmlView`, `respondView`, `page`, `sendView`) |
 | `dev.fathony.tired.web-assets` | yes | Bundles the script and stylesheet into hashed files with esbuild, exposed as `AssetManifest` |
 | `dev.fathony.tired.icons` | no | Lucide icons: one SVG sprite, the `Icons` enum and, with KTML, the `<icon>` tag |
-| `dev.fathony.tired.native` | no | `nativeCompile`: the app as a GraalVM native image |
+| `dev.fathony.tired.native` | no | `nativeCompile`: the app as a GraalVM native image; `nativeSmokeTest` |
 
 The app sets its main class and its own feature libraries, such as `ktor-server-resources` or `ktor-server-sse`:
 
@@ -40,6 +40,20 @@ application {
     mainClass = "com.example.MainKt"
 }
 ```
+
+## Smoke test
+
+`./gradlew smokeTest` starts the built app and requests pages from it, along with the stylesheets, scripts and icons
+they link to. It fails when the app doesn't start or anything answers with an error:
+
+```kotlin
+smokeTest {
+    port = 3000                         // default
+    paths = listOf("/", "/contacts")    // default: "/"
+}
+```
+
+It isn't part of `check`, because it needs the port free. Run it in CI.
 
 ## Web assets
 
@@ -130,17 +144,7 @@ reflection or reads resources, add a
 `src/main/resources/META-INF/native-image/<group>/<name>/`. `./gradlew run` and the tests stay on the JVM.
 
 What an image is missing only shows when the code that needs it runs, so a page that renders on the JVM can still fail
-in the image. `./gradlew nativeSmokeTest` starts the executable and requests pages from it, failing on an error
-response or a crash:
-
-```kotlin
-tasks.nativeSmokeTest {
-    port = 3000                         // default
-    paths = listOf("/", "/contacts")    // default: "/"
-}
-```
-
-It isn't part of `check`, because it needs the port free and a native build. Run it in CI.
+in the image. `./gradlew nativeSmokeTest` gives the image the [same test](#smoke-test) as the JVM build.
 
 ## Toolchain
 

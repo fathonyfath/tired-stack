@@ -133,7 +133,8 @@ Every Lucide icon is available as `Icons.Name`, and the built sprite only keeps 
 | `./gradlew setupGitHooks` | Enable the pre-commit hook, which lints staged files |
 | `./gradlew buildFatJar` | Build `app/build/libs/app-all.jar` (`java -jar app/build/libs/app-all.jar`) |
 | `./gradlew nativeCompile` | Build a GraalVM native executable at `app/build/native/nativeCompile/app` |
-| `./gradlew nativeSmokeTest` | Start the native executable and request a page of every feature from it |
+| `./gradlew smokeTest` | Start the built app and request a page of every feature from it |
+| `./gradlew nativeSmokeTest` | The same, against the native executable |
 | `./gradlew runDocker` | Build the Docker image and run it locally (needs Docker) |
 | `./gradlew publishImage` | Push the image to `ghcr.io/fathonyfath/tired-stack-sample` (needs `GHCR_USERNAME`, `GHCR_TOKEN`) |
 
