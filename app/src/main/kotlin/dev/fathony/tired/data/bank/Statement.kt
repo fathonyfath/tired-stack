@@ -1,7 +1,7 @@
 package dev.fathony.tired.data.bank
 
 import dev.fathony.tired.data.Name
-import java.time.Instant
+import kotlin.time.Instant
 
 /**
  * One line of the ledger: [previous] plus [change] is [balance].

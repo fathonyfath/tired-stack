@@ -1,0 +1,4 @@
+-- What a search is matched against: the name and email in lower case with their accents removed.
+-- SQLite cannot remove accents, so the rows already there are filled in from code once this has run.
+
+ALTER TABLE contacts ADD COLUMN search_text TEXT NOT NULL DEFAULT '';

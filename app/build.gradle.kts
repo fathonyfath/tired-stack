@@ -4,6 +4,7 @@ plugins {
     id("dev.fathony.tired")
     id("dev.fathony.tired.icons")
     id("dev.fathony.tired.native")
+    alias(libs.plugins.sqldelight)
 }
 
 application {
@@ -53,6 +54,19 @@ smokeTest {
     paths = listOf("/", "/htmx-test", "/htmx", "/contacts", "/contacts?q=an", "/bank", "/tickets", "/sse-demo")
 }
 
+/**
+ * The migrations are the schema: every query in a `.sq` file is checked against what they add up to.
+ */
+sqldelight {
+    databases {
+        create("Database") {
+            packageName = "dev.fathony.tired.data"
+            dialect(libs.sqldelight.sqlite.dialect)
+            deriveSchemaFromMigrations = true
+        }
+    }
+}
+
 webAssets {
     npm("htmx.org", "2.0.11")
     npm("htmx-ext-sse", "2.2.4")
@@ -70,4 +84,6 @@ dependencies {
     implementation(libs.ktor.server.htmx)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.sqlite.jdbc)
+    implementation(libs.sqldelight.sqlite.driver)
+    implementation(libs.hikari)
 }

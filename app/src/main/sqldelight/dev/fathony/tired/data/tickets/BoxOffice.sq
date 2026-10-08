@@ -1,0 +1,26 @@
+counts:
+SELECT
+    count(*) AS seats,
+    count(sold_at) AS sold,
+    count(CASE WHEN held_until > :now THEN 1 END) AS held
+FROM seats;
+
+hold:
+UPDATE seats SET hold = :token, held_until = :until
+WHERE number = (
+    SELECT number FROM seats
+    WHERE sold_at IS NULL AND (hold IS NULL OR held_until <= :now)
+    ORDER BY number LIMIT 1
+)
+RETURNING number;
+
+sell:
+UPDATE seats SET sold_at = :now, held_until = NULL
+WHERE hold = :token AND sold_at IS NULL AND held_until > :now
+RETURNING number;
+
+sold:
+SELECT number FROM seats WHERE hold = :token AND sold_at IS NOT NULL;
+
+build:
+INSERT INTO seats (number) VALUES (?);

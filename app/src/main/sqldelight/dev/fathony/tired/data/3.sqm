@@ -1,0 +1,18 @@
+import dev.fathony.tired.data.tickets.HoldToken;
+import kotlin.time.Instant;
+
+-- The table refuses a seat that is sold twice or held and sold at once.
+
+CREATE TABLE seats (
+    number INTEGER PRIMARY KEY,
+    hold TEXT AS HoldToken UNIQUE,
+    held_until INTEGER AS Instant,
+    sold_at INTEGER AS Instant,
+    CHECK (held_until IS NULL OR sold_at IS NULL),
+    CHECK ((hold IS NULL) = (held_until IS NULL AND sold_at IS NULL))
+);
+
+CREATE TRIGGER seats_sold_once BEFORE UPDATE ON seats WHEN old.sold_at IS NOT NULL
+BEGIN
+    SELECT RAISE(ABORT, 'a sold seat stays sold');
+END;

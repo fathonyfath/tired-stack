@@ -60,8 +60,7 @@ fun Route.contacts(book: AddressBook) {
      */
     suspend fun rows(request: Contacts): ContactRowsFragment {
         val query = request.q.trim().take(MAX_QUERY_LENGTH)
-        val matched = if (query.isEmpty()) book else book.matching(query)
-        val found = (request.after?.let(matched::olderThan) ?: matched).newest(PAGE_SIZE + 1)
+        val found = book.newest(PAGE_SIZE + 1, matching = query, before = request.after ?: Long.MAX_VALUE)
         val shown = found.take(PAGE_SIZE)
         val next = if (found.size > PAGE_SIZE) application.href(Contacts(query, shown.last().id)) else null
         return ContactRowsFragment(shown, next)
