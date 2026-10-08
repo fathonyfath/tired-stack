@@ -1,0 +1,10 @@
+newest:
+SELECT id, name, email FROM contacts
+WHERE search_text LIKE :pattern AND id < :before
+ORDER BY id DESC LIMIT :count;
+
+add:
+INSERT INTO contacts (name, email, search_text) VALUES (?, ?, ?) RETURNING id;
+
+remove:
+DELETE FROM contacts WHERE id = ?;

@@ -1,12 +1,12 @@
 package dev.fathony.tired
 
 import dev.fathony.tired.data.EphemeralFile
-import dev.fathony.tired.data.Schema
-import dev.fathony.tired.data.Seed
-import dev.fathony.tired.data.WalSqlite
-import dev.fathony.tired.data.bank.SqliteLedger
-import dev.fathony.tired.data.contacts.SqliteAddressBook
-import dev.fathony.tired.data.tickets.SqliteBoxOffice
+import dev.fathony.tired.data.Sqlite
+import dev.fathony.tired.data.bank.Ledger
+import dev.fathony.tired.data.contacts.AddressBook
+import dev.fathony.tired.data.contacts.fillSearchText
+import dev.fathony.tired.data.seed
+import dev.fathony.tired.data.tickets.BoxOffice
 import dev.fathony.tired.features.bank
 import dev.fathony.tired.features.contacts
 import dev.fathony.tired.features.home
@@ -23,10 +23,9 @@ import io.ktor.server.sse.SSE
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val database = WalSqlite(EphemeralFile("tired-contacts.db"), readers = 4)
+    val sqlite = Sqlite(EphemeralFile("tired-contacts.db").fresh(), readers = 4, fillSearchText)
     runBlocking {
-        Schema(database).create()
-        Seed(database, contacts = 10_000, seats = 100).plant()
+        seed(sqlite, contacts = 10_000, seats = 100)
     }
     embeddedServer(Netty, port = 3000) {
         installTired()
@@ -36,9 +35,9 @@ fun main() {
         routing {
             home()
             htmxDemo()
-            contacts(SqliteAddressBook(database))
-            bank(SqliteLedger(database))
-            tickets(SqliteBoxOffice(database))
+            contacts(AddressBook(sqlite))
+            bank(Ledger(sqlite))
+            tickets(BoxOffice(sqlite))
             sseDemo()
         }
     }.start(wait = true)

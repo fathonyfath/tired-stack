@@ -1,86 +1,51 @@
 package dev.fathony.tired.data
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
-import java.sql.Connection
-import java.sql.DriverManager
+import app.cash.sqldelight.ColumnAdapter
+import app.cash.sqldelight.db.SqlDriver
+import dev.fathony.tired.data.bank.AccountId
+import dev.fathony.tired.data.bank.Balance
+import dev.fathony.tired.data.bank.Change
+import dev.fathony.tired.data.bank.PostingKey
+import dev.fathony.tired.data.contacts.Email
+import dev.fathony.tired.data.tickets.HoldToken
+import kotlin.time.Instant
 
-interface Database {
-    /**
-     * One snapshot: every query in [query] sees the database as it was at the same moment.
-     */
-    suspend fun <T> read(query: (Sql) -> T): T
-
-    /**
-     * One transaction: everything [update] did is kept when it returns and undone when it throws.
-     */
-    suspend fun <T> write(update: (Sql) -> T): T
-}
+private val accountId = column(::AccountId) { it.number }
+private val name = column(::Name) { it.toString() }
+private val instant = column(Instant::fromEpochMilliseconds) { it.toEpochMilliseconds() }
+private val balance = column(::Balance) { it.units }
 
 /**
- * SQLite in WAL mode: one connection writes while the others read, none of them waiting on each other.
- * Writes take turns, so a transaction never meets another one halfway and never needs a retry.
- * Every connection opens on first use, and SQLite refuses a write on the reading ones.
+ * The generated queries on [driver], with each column's value converted to what it is in the code,
+ * so a query hands back a [Balance] and not a number.
  */
-class WalSqlite(
-    private val file: EphemeralFile,
-    private val readers: Int,
-) : Database {
-    private val lock = Mutex()
-    private val opened by lazy {
-        val url = "jdbc:sqlite:${file.fresh()}"
-        val writer = connection(url, "journal_mode = WAL")
-        val pool = Channel<Connection>(readers)
-        repeat(readers) { pool.trySend(connection(url, "query_only = ON")) }
-        Opened(writer, pool)
-    }
-
-    override suspend fun <T> read(query: (Sql) -> T): T =
-        withContext(Dispatchers.IO) {
-            val reader = opened.readers.receive()
-            try {
-                query(Sql(reader))
-            } finally {
-                try {
-                    reader.rollback()
-                } finally {
-                    opened.readers.trySend(reader)
-                }
-            }
-        }
-
-    override suspend fun <T> write(update: (Sql) -> T): T =
-        lock.withLock {
-            withContext(Dispatchers.IO) {
-                val writer = opened.writer
-                try {
-                    update(Sql(writer)).also { writer.commit() }
-                } catch (failure: Throwable) {
-                    writer.rollback()
-                    throw failure
-                }
-            }
-        }
-
-    private fun connection(
-        url: String,
-        pragma: String,
-    ): Connection =
-        DriverManager.getConnection(url).also { connection ->
-            connection.createStatement().use {
-                it.execute("PRAGMA synchronous = NORMAL")
-                it.execute("PRAGMA busy_timeout = 5000")
-                it.execute("PRAGMA foreign_keys = ON")
-                it.execute("PRAGMA $pragma")
-            }
-            connection.autoCommit = false
-        }
-
-    private class Opened(
-        val writer: Connection,
-        val readers: Channel<Connection>,
+fun Database.Companion.on(driver: SqlDriver): Database =
+    Database(
+        driver,
+        accountsAdapter = Accounts.Adapter(idAdapter = accountId, nameAdapter = name),
+        contactsAdapter = Contacts.Adapter(nameAdapter = name, emailAdapter = column(::Email) { it.toString() }),
+        entriesAdapter =
+            Entries.Adapter(
+                account_idAdapter = accountId,
+                postingAdapter = column(::PostingKey) { it.toString() },
+                atAdapter = instant,
+                previousAdapter = balance,
+                changeAdapter = column(::Change) { it.units },
+                balanceAdapter = balance,
+            ),
+        seatsAdapter =
+            Seats.Adapter(
+                holdAdapter = column(::HoldToken) { it.toString() },
+                held_untilAdapter = instant,
+                sold_atAdapter = instant,
+            ),
     )
+
+private fun <T : Any, S> column(
+    decode: (S) -> T,
+    encode: (T) -> S,
+) = object : ColumnAdapter<T, S> {
+    override fun decode(databaseValue: S): T = decode(databaseValue)
+
+    override fun encode(value: T): S = encode(value)
 }

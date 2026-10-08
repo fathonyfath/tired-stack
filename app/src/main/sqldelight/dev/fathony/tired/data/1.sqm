@@ -1,0 +1,57 @@
+import dev.fathony.tired.data.Name;
+import dev.fathony.tired.data.bank.AccountId;
+import dev.fathony.tired.data.bank.Balance;
+import dev.fathony.tired.data.bank.Change;
+import dev.fathony.tired.data.bank.PostingKey;
+import kotlin.time.Instant;
+
+-- The tables refuse what the code should never send, so a bug in it cannot leave them wrong:
+-- an entry that overdraws, does not add up, does not continue from its account's latest one or repeats a posting,
+-- and any change to an entry once written.
+
+CREATE TABLE accounts (
+    id INTEGER AS AccountId PRIMARY KEY,
+    name TEXT AS Name NOT NULL UNIQUE
+);
+
+CREATE TABLE entries (
+    id INTEGER PRIMARY KEY,
+    account_id INTEGER AS AccountId NOT NULL REFERENCES accounts (id),
+    posting TEXT AS PostingKey NOT NULL,
+    at INTEGER AS Instant NOT NULL,
+    previous INTEGER AS Balance NOT NULL,
+    change INTEGER AS Change NOT NULL CHECK (change <> 0),
+    balance INTEGER AS Balance NOT NULL CHECK (balance >= 0 AND balance = previous + change),
+    UNIQUE (posting, account_id)
+);
+
+CREATE INDEX entries_by_account ON entries (account_id, id);
+
+CREATE TRIGGER entries_continue BEFORE INSERT ON entries
+BEGIN
+    SELECT RAISE(ABORT, 'entry does not continue from the latest balance')
+    WHERE new.previous <> COALESCE(
+        (SELECT balance FROM entries WHERE account_id = new.account_id ORDER BY id DESC LIMIT 1), 0
+    );
+END;
+
+CREATE TRIGGER entries_unchanged BEFORE UPDATE ON entries
+BEGIN
+    SELECT RAISE(ABORT, 'an entry is never changed');
+END;
+
+CREATE TRIGGER entries_kept BEFORE DELETE ON entries
+BEGIN
+    SELECT RAISE(ABORT, 'an entry is never removed');
+END;
+
+CREATE VIEW balances AS
+SELECT
+    a.id,
+    a.name,
+    COALESCE((SELECT e.balance FROM entries e WHERE e.account_id = a.id ORDER BY e.id DESC LIMIT 1), 0) AS balance
+FROM accounts a;
+
+CREATE VIEW lines AS
+SELECT e.id, a.name AS account, e.posting, e.at, e.previous, e.change, e.balance
+FROM entries e JOIN accounts a ON a.id = e.account_id;

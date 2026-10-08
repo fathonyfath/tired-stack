@@ -1,7 +1,7 @@
 package dev.fathony.tired.data.tickets
 
 import dev.fathony.tired.data.Refused
-import java.time.Instant
+import kotlin.time.Instant
 
 private val tokenShape = Regex("[A-Za-z0-9-]{8,64}")
 

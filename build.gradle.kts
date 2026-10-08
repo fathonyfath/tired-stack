@@ -6,6 +6,7 @@ import com.github.gradle.node.npm.task.NpmTask
  */
 plugins {
     id("dev.fathony.tired") apply false
+    alias(libs.plugins.sqldelight) apply false
 }
 
 /**

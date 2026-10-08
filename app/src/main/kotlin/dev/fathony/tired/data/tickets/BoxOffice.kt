@@ -1,91 +1,51 @@
 package dev.fathony.tired.data.tickets
 
-import dev.fathony.tired.data.Database
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
+import dev.fathony.tired.data.Sqlite
 import java.util.UUID
-
-interface BoxOffice {
-    suspend fun tally(): Tally
-
-    /**
-     * Throws [SoldOut] when every seat is sold or held.
-     */
-    suspend fun hold(): Hold
-
-    /**
-     * Confirming the same hold again gives the same ticket. Throws [HoldExpired] once the hold has run out.
-     */
-    suspend fun confirm(token: HoldToken): Ticket
-}
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Every seat is a row, so a seat can only ever have one owner; there is no count that could run past the capacity.
  * A hold that ran out is not cleaned up, it is simply free for the next hold to take.
  */
-class SqliteBoxOffice(
-    private val database: Database,
-    private val holdFor: Duration = Duration.ofSeconds(30),
-    private val clock: Clock = Clock.systemUTC(),
-) : BoxOffice {
-    override suspend fun tally(): Tally =
-        database.read { sql ->
-            sql
-                .query(
-                    """
-                    SELECT count(*),
-                           count(*) FILTER (WHERE sold_at IS NOT NULL),
-                           count(*) FILTER (WHERE sold_at IS NULL AND held_until > ?)
-                    FROM seats
-                    """.trimIndent(),
-                    clock.millis(),
-                ) { Tally(free = it.getInt(1) - it.getInt(2) - it.getInt(3), held = it.getInt(3), sold = it.getInt(2)) }
-                .single()
+class BoxOffice(
+    private val sqlite: Sqlite,
+    private val holdFor: Duration = 30.seconds,
+    private val clock: Clock = Clock.System,
+) {
+    suspend fun tally(): Tally =
+        sqlite.read { database ->
+            database.boxOfficeQueries
+                .counts(clock.now()) { seats, sold, held ->
+                    Tally(free = (seats - sold - held).toInt(), held = held.toInt(), sold = sold.toInt())
+                }.executeAsOne()
         }
 
-    override suspend fun hold(): Hold =
-        database.write { sql ->
-            val now = clock.millis()
-            val until = now + holdFor.toMillis()
+    /**
+     * Throws [SoldOut] when every seat is sold or held.
+     */
+    suspend fun hold(): Hold =
+        sqlite.write { database ->
+            val now = Instant.fromEpochMilliseconds(clock.now().toEpochMilliseconds())
+            val until = now + holdFor
             val token = HoldToken(UUID.randomUUID().toString())
-            sql
-                .query(
-                    """
-                    UPDATE seats SET hold = ?, held_until = ?
-                    WHERE number = (
-                        SELECT number FROM seats
-                        WHERE sold_at IS NULL AND (hold IS NULL OR held_until <= ?)
-                        ORDER BY number LIMIT 1
-                    )
-                    RETURNING number
-                    """.trimIndent(),
-                    token.toString(),
-                    until,
-                    now,
-                ) { Hold(token, it.getInt(1), Instant.ofEpochMilli(until)) }
-                .firstOrNull() ?: throw SoldOut()
+            val seat = database.boxOfficeQueries.hold(token, until, now).executeAsOneOrNull() ?: throw SoldOut()
+            Hold(token, seat.toInt(), until)
         }
 
-    override suspend fun confirm(token: HoldToken): Ticket =
-        database.write { sql ->
-            val now = clock.millis()
-            sql
-                .query(
-                    """
-                    UPDATE seats SET sold_at = ?, held_until = NULL
-                    WHERE hold = ? AND sold_at IS NULL AND held_until > ?
-                    RETURNING number
-                    """.trimIndent(),
-                    now,
-                    token.toString(),
-                    now,
-                ) { Ticket(it.getInt(1)) }
-                .firstOrNull()
-                ?: sql
-                    .query("SELECT number FROM seats WHERE hold = ? AND sold_at IS NOT NULL", token.toString()) {
-                        Ticket(it.getInt(1))
-                    }.firstOrNull()
-                ?: throw HoldExpired()
+    /**
+     * Confirming the same hold again gives the same ticket. Throws [HoldExpired] once the hold has run out.
+     */
+    suspend fun confirm(token: HoldToken): Ticket =
+        sqlite.write { database ->
+            val seats = database.boxOfficeQueries
+            val seat =
+                seats.sell(clock.now(), token).executeAsOneOrNull()
+                    ?: seats.sold(token).executeAsOneOrNull()
+                    ?: throw HoldExpired()
+            Ticket(seat.toInt())
         }
 }

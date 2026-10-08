@@ -1,59 +1,33 @@
 package dev.fathony.tired.data.contacts
 
-import dev.fathony.tired.data.Database
 import dev.fathony.tired.data.Name
+import dev.fathony.tired.data.Sqlite
 
-/**
- * [matching] and [olderThan] narrow the book without touching the database; [newest] runs the query.
- */
-interface AddressBook {
-    fun matching(text: String): AddressBook
-
-    fun olderThan(id: Long): AddressBook
-
-    suspend fun newest(count: Int): List<Contact>
+class AddressBook(
+    private val sqlite: Sqlite,
+) {
+    /**
+     * The newest [count] contacts whose name or email contains [matching], whatever its case or accents,
+     * among those added before [before].
+     */
+    suspend fun newest(
+        count: Int,
+        matching: String = "",
+        before: Long = Long.MAX_VALUE,
+    ): List<Contact> =
+        sqlite.read {
+            it.addressBookQueries.newest("%${folded(matching)}%", before, count.toLong(), ::Contact).executeAsList()
+        }
 
     suspend fun add(
         name: Name,
         email: Email,
-    ): Contact
-
-    suspend fun remove(id: Long)
-}
-
-class SqliteAddressBook(
-    private val database: Database,
-    private val where: String = "1",
-    private val args: List<Any> = emptyList(),
-) : AddressBook {
-    override fun matching(text: String): AddressBook =
-        SqliteAddressBook(database, "$where AND (name LIKE ? OR email LIKE ?)", args + "%$text%" + "%$text%")
-
-    override fun olderThan(id: Long): AddressBook = SqliteAddressBook(database, "$where AND id < ?", args + id)
-
-    override suspend fun newest(count: Int): List<Contact> =
-        database.read { sql ->
-            sql.query(
-                "SELECT id, name, email FROM contacts WHERE $where ORDER BY id DESC LIMIT ?",
-                *(args + count).toTypedArray(),
-            ) { Contact(it.getLong(1), Name(it.getString(2)), Email(it.getString(3))) }
-        }
-
-    override suspend fun add(
-        name: Name,
-        email: Email,
     ): Contact =
-        database.write { sql ->
-            sql
-                .query(
-                    "INSERT INTO contacts (name, email) VALUES (?, ?) RETURNING id",
-                    name.toString(),
-                    email.toString(),
-                ) { Contact(it.getLong(1), name, email) }
-                .single()
+        sqlite.write {
+            Contact(it.addressBookQueries.add(name, email, searchText(name, email)).executeAsOne(), name, email)
         }
 
-    override suspend fun remove(id: Long) {
-        database.write { sql -> sql.execute("DELETE FROM contacts WHERE id = ?", id) }
+    suspend fun remove(id: Long) {
+        sqlite.write { it.addressBookQueries.remove(id) }
     }
 }

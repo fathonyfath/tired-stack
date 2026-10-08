@@ -1,0 +1,17 @@
+accounts:
+SELECT id, name, balance FROM balances ORDER BY id;
+
+balance:
+SELECT balance FROM balances WHERE id = ?;
+
+latest:
+SELECT * FROM lines ORDER BY id DESC LIMIT :count;
+
+posted:
+SELECT * FROM lines WHERE posting = ? ORDER BY id;
+
+record:
+INSERT INTO entries (account_id, posting, at, previous, change, balance) VALUES (?, ?, ?, ?, ?, ?);
+
+open:
+INSERT INTO accounts (name) VALUES (?);

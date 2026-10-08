@@ -1,0 +1,8 @@
+import dev.fathony.tired.data.Name;
+import dev.fathony.tired.data.contacts.Email;
+
+CREATE TABLE contacts (
+    id INTEGER PRIMARY KEY,
+    name TEXT AS Name NOT NULL,
+    email TEXT AS Email NOT NULL
+);
