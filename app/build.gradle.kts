@@ -71,8 +71,8 @@ webAssets {
     npm("htmx.org", "2.0.11")
     npm("htmx-ext-sse", "2.2.4")
 
-    npm("tailwindcss", "4.3.4")
-    npm("@tailwindcss/postcss", "4.3.4")
+    npm("tailwindcss", "4.3.5")
+    npm("@tailwindcss/postcss", "4.3.5")
     postcss("@tailwindcss/postcss")
 }
 
